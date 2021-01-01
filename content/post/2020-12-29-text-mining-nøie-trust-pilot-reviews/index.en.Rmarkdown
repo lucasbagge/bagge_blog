@@ -78,12 +78,15 @@ url6 <- 'https://dk.trustpilot.com/review/noie.com?b=MjAyMC0wMS0xNlQxMzo0OToyNi4
 url7 <- 'https://dk.trustpilot.com/review/noie.com?b=MjAxOS0xMi0wNFQxNDo0Nzo1NC4wMDBa'
 ```
 
-I am gonna make three functions: 
-- `get_ratings` 
-- `get_reviews` and
-- `get_reviewer_names` 
-and combine it into a tibble with `get_data` to
-extract the data.
+I am gonna make three functions:
+
+-   `get_ratings`
+
+-   `get_reviews`
+
+-   `get_reviewer_names`
+
+and combine it into a tibble with `get_data` to extract the data.
 
 ```{r}
 get_ratings <- function(html){
@@ -270,8 +273,8 @@ top_terms_pos <- topics_pos %>%
 
 ## Topic modelling for negative reviews
 
-Let us see what can be said regarding the negativ reviews where the sentiment
-score is below -1
+Let us see what can be said regarding the negativ reviews where the
+sentiment score is below -1
 
 ```{r}
 df_neg <- 
@@ -347,10 +350,10 @@ grid.arrange(plot_pos, plot_neg, ncol = 1)
 
 ## Word co-occurrence within reviews
 
-To see whether word paris like "bad creame" and "good creme" are frequent in
-the data sets, we´ll count how many times each pair of words occurs togeather
-in a title or description field. This can easy be done with `pairwise_count()`
-function.
+To see whether word paris like "bad creame" and "good creme" are
+frequent in the data sets, we´ll count how many times each pair of words
+occurs togeather in a title or description field. This can easy be done
+with `pairwise_count()` function.
 
 ```{r}
 word_pairs_pos <- df_pos %>% 
@@ -360,8 +363,8 @@ word_pairs_neg <- df_neg %>%
   pairwise_count(word, reviewer, sort = TRUE)
 ```
 
-We can then plot the most common word pairs co-occurring in the reviews by means
-of the `igraph` and `ggraph` packages.
+We can then plot the most common word pairs co-occurring in the reviews
+by means of the `igraph` and `ggraph` packages.
 
 ```{r pair_wise helper function}
 pair_wise_helper <- function(data, title, color){
@@ -396,13 +399,13 @@ grid.arrange(pairs_plot_pos, pairs_plot_neg, ncol = 2)
 
 ## Word pair correlations
 
-Aanother interesting idea is to measure the correlation for specific words.
-Here I only look at the positiv dataset because there are to few observation
-in the negative one.
+Aanother interesting idea is to measure the correlation for specific
+words. Here I only look at the positiv dataset because there are to few
+observation in the negative one.
 
-> As an alternative idea is to perform an n-gram analysis to find out which
-  words most frequently are used.
-  
+> As an alternative idea is to perform an n-gram analysis to find out
+> which words most frequently are used.
+
 ```{r}
 cor_pos <- 
   df_pos %>% 
@@ -429,6 +432,6 @@ cor_pos %>%
   my_theme()
 ```
 
-The analysis confirm that Nøie has a very high custumer satisfication. The customer
-are describing the producted to delivered what they want and the service is
-very satisfiying. 
+The analysis confirm that Nøie has a very high custumer satisfication.
+The customer are describing the producted to delivered what they want
+and the service is very satisfiying.
