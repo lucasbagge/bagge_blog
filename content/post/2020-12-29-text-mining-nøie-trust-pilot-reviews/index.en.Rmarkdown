@@ -78,8 +78,11 @@ url6 <- 'https://dk.trustpilot.com/review/noie.com?b=MjAyMC0wMS0xNlQxMzo0OToyNi4
 url7 <- 'https://dk.trustpilot.com/review/noie.com?b=MjAxOS0xMi0wNFQxNDo0Nzo1NC4wMDBa'
 ```
 
-I am gonna make three functions: `get_ratings`, `get_reviews` and
-`get_reviewer_names` and combine it into a tibble with `get_data` to
+I am gonna make three functions: 
+- `get_ratings` 
+- `get_reviews` and
+- `get_reviewer_names` 
+and combine it into a tibble with `get_data` to
 extract the data.
 
 ```{r}
