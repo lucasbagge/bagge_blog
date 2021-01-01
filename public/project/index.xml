@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects | Lucas Bagge</title>
+    <link>/project/</link>
+      <atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <description>Projects</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Isabella Benabaye, 2021</copyright><lastBuildDate>Thu, 24 Dec 2020 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/sharing_image.jpg</url>
+      <title>Projects</title>
+      <link>/project/</link>
+    </image>
+    
+    <item>
+      <title>Master of tidyverse</title>
+      <link>/project/master_of_the_tidyverse/</link>
+      <pubDate>Thu, 24 Dec 2020 00:00:00 +0000</pubDate>
+      <guid>/project/master_of_the_tidyverse/</guid>
+      <description>&lt;p&gt;In the course &amp;ldquo;Introduction to data science&amp;rdquo; which is about learning essentiel
+tools for a data scientist including:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;plotting&lt;/li&gt;
+&lt;li&gt;manipulate data&lt;/li&gt;
+&lt;li&gt;regular expressions&lt;/li&gt;
+&lt;li&gt;modelling&lt;/li&gt;
+&lt;li&gt;explanatory data analysis&lt;/li&gt;
+&lt;li&gt;retional database&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here we had an contest in finding a data set and show wha you have learn. I
+my an analysis of gas emission and showed analysis the market and which contries
+contributed the most to the emission.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Did QE effect the economics</title>
+      <link>/project/qe/</link>
+      <pubDate>Fri, 24 Apr 2020 00:00:00 +0000</pubDate>
+      <guid>/project/qe/</guid>
+      <description>&lt;p&gt;After the financial crisis the world economics saw it self in the deepest
+recessions since 1939. For comming out of this crisis the Euopean Central Bank (ECB)
+tried a alternative tool called Quantitative easing. It was implementet as
+a way to secure price stability which is ECB main agenda. In this analysis I
+try to quantify weather they made their goal and as a side effect managed to
+lift the economics. By measuring this I am using a vector autoregressiv (VAR)
+model.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

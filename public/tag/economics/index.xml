@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Economics | Lucas Bagge</title>
+    <link>/tag/economics/</link>
+      <atom:link href="/tag/economics/index.xml" rel="self" type="application/rss+xml" />
+    <description>Economics</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Isabella Benabaye, 2021</copyright><lastBuildDate>Fri, 24 Apr 2020 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/sharing_image.jpg</url>
+      <title>Economics</title>
+      <link>/tag/economics/</link>
+    </image>
+    
+    <item>
+      <title>Did QE effect the economics</title>
+      <link>/project/qe/</link>
+      <pubDate>Fri, 24 Apr 2020 00:00:00 +0000</pubDate>
+      <guid>/project/qe/</guid>
+      <description>&lt;p&gt;After the financial crisis the world economics saw it self in the deepest
+recessions since 1939. For comming out of this crisis the Euopean Central Bank (ECB)
+tried a alternative tool called Quantitative easing. It was implementet as
+a way to secure price stability which is ECB main agenda. In this analysis I
+try to quantify weather they made their goal and as a side effect managed to
+lift the economics. By measuring this I am using a vector autoregressiv (VAR)
+model.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

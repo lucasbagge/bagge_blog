@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.7.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Lucas Bagge">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Introduction In this analysis I am gonna scapes truspilot web page for reviews given by customer for the skincare firm Nøie.
+Here I am gonna use the data to make some topic modelling.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/text-mining-n%C3%B8ie-trust-pilot-reviews/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#88BDBC">
+  
+
+  
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous">
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+        
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:100,200,300,400,600,700%7CSource+Code+Pro%7CRoboto%7CRaleway:100,200,300,400,500,600&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hub7cce6fc17a4b537dd89fd523a3d6c48_35686_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hub7cce6fc17a4b537dd89fd523a3d6c48_35686_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="/post/text-mining-n%C3%B8ie-trust-pilot-reviews/">
+
+  
+  
+  
+  
+  
+    
+  
+  
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="twitter:site" content="@_bcullen">
+  <meta property="twitter:creator" content="@_bcullen">
+  
+  <meta property="og:site_name" content="Lucas Bagge">
+  <meta property="og:url" content="/post/text-mining-n%C3%B8ie-trust-pilot-reviews/">
+  <meta property="og:title" content="Text mining - nøie trust pilot reviews | Lucas Bagge">
+  <meta property="og:description" content="Introduction In this analysis I am gonna scapes truspilot web page for reviews given by customer for the skincare firm Nøie.
+Here I am gonna use the data to make some topic modelling."><meta property="og:image" content="/img/sharing_image.jpg">
+  <meta property="twitter:image" content="/img/sharing_image.jpg"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2020-12-29T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2020-12-29T22:49:57&#43;01:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/post/text-mining-n%C3%B8ie-trust-pilot-reviews/"
+  },
+  "headline": "Text mining - nøie trust pilot reviews",
+  
+  "datePublished": "2020-12-29T00:00:00Z",
+  "dateModified": "2020-12-29T22:49:57+01:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Lucas Bagge"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Lucas Bagge",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "img//"
+    }
+  },
+  "description": "Introduction In this analysis I am gonna scapes truspilot web page for reviews given by customer for the skincare firm Nøie.\nHere I am gonna use the data to make some topic modelling."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+  <link rel="stylesheet" href="/css/codefolding.css" />
+
+
+  <title>Text mining - nøie trust pilot reviews | Lucas Bagge</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Lucas Bagge</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Lucas Bagge</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-end" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>ABOUT</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/project_landing"><span>PROJECTS</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link  active" href="/post"><span>BLOG</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/contact"><span>CONTACT</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+      <li class="nav-item">
+        <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Text mining - nøie trust pilot reviews</h1>
+
+  
+
+  
+    
+
+<div id="code-folding-buttons" class="dropdown btn-group pull-right">
+  <a class="btn btn-light btn-lg dropdown-toggle" href="#" role="button" id="allCodeToggleButton"
+     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Code
+  </a>
+  <div class="dropdown-menu" aria-labelledby="allCodeToggleButton">
+    <a id="rmd-show-all-code" class="dropdown-item small" href="#">Show all</a>
+    <a id="rmd-hide-all-code" class="dropdown-item small" href="#">Hide all</a>
+  </div>
+</div>
+
+
+
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    Dec 29, 2020
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    5 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/text-mining/">text mining</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <h2 id="introduction">Introduction</h2>
+<p>In this analysis I am gonna scapes truspilot web page for reviews given by
+customer for the skincare firm Nøie.</p>
+<p>Here I am gonna use the data to make some topic modelling.</p>
+<h2 id="web-scraping">Web scraping</h2>
+<p>For sciping the 
+<a href="https://www.trustpilot.com/review/noie.com" target="_blank" rel="noopener">trutpilot site</a>
+</p>
+<p>I am gonna make three functions: <code>get_ratings</code>, <code>get_reviews</code> and
+<code>get_reviewer_names</code> and combine it into a tibble with <code>get_data</code> to extract the
+data.</p>
+<pre><code class="language-r">get_ratings &lt;- function(html) {
+  html %&gt;%
+    read_html() %&gt;%
+    html_nodes(&quot;body&quot;) %&gt;%
+    html_nodes(&quot;.star-rating&quot;) %&gt;%
+    as.character() %&gt;%
+    str_subset(&quot;medium&quot;) %&gt;%
+    str_extract(&quot;(\\d stjerne)&quot;) %&gt;%
+    str_remove((&quot;( stjerne)&quot;)) %&gt;%
+    unlist()
+}
+
+get_reviews &lt;- function(html) {
+  html %&gt;%
+    read_html() %&gt;%
+    html_nodes(&quot;.review-content__body&quot;) %&gt;%
+    html_text() %&gt;%
+    str_trim() %&gt;%
+    unlist()
+}
+
+get_reviewer_names &lt;- function(html) {
+  html %&gt;%
+    read_html() %&gt;%
+    html_nodes(&quot;.consumer-information__name&quot;) %&gt;%
+    html_text() %&gt;%
+    str_trim() %&gt;%
+    unlist()
+}
+
+get_data &lt;- function(html) {
+  review &lt;- get_reviews(html)
+  names &lt;- get_reviewer_names(html)
+  ratings &lt;- get_ratings(html)
+  data &lt;- tibble(
+    reviewer = names,
+    rating = ratings,
+    review = review
+  )
+  data
+}
+
+urls &lt;- cbind(c(url1, url2, url3, url4, url5, url6, url7))
+
+url_list &lt;- map(urls, get_data) %&gt;%
+  as.list()
+
+data &lt;- do.call(bind_rows, url_list)
+</code></pre>
+<p>Let us quick take a look at what I have extracted from the site:</p>
+<pre><code class="language-r">data %&gt;%
+  head()
+</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   reviewer                rating review                                         
+##   &lt;chr&gt;                   &lt;chr&gt;  &lt;chr&gt;                                          
+## 1 Lars Jensen             5      &quot;Gode produkter og super service. Skru ned for…
+## 2 Maria Cirkeline Rasmin… 5      &quot;Super produkter\n                \n        \n…
+## 3 Lis                     1      &quot;2 cremer gav endnu mere uren hud + ulovlig ma…
+## 4 Trine Holm              5      &quot;Min hud slår altid ud om vinteren.\n         …
+## 5 Camilla                 1      &quot;Min hud er værre end nogensinde\n            …
+## 6 Andrea Broe             5      &quot;Stor anbefaling\n                \n        \n…
+</code></pre>
+<p>We see the following information:</p>
+<ul>
+<li><code>reviewer</code> that is the person that has used the product.</li>
+<li><code>rating</code> what the the reviewer has chosen to give the product on a scale from
+1-5.</li>
+<li><code>review</code> is the comment given by the reviewer and the central aspect for this
+analysis.</li>
+</ul>
+<p>In the next section I will drewll into into the preprocessig step for this text
+mining task.</p>
+<h2 id="loading-and-preparing-the-data">Loading and preparing the data</h2>
+<p>From the data we can see that the reviews are in Danish. Here we can use the <code>happyorsad</code> package
+to compute a sentiment score for each review. Thease score are based on a Danish list of
+sentiment words and put toheather by 
+<a href="https://www.dtu.dk/service/telefonbog/person?id=1755&amp;cpid=&amp;tab=1" target="_blank" rel="noopener">Finn Årup Nielsen</a>
+</p>
+<pre><code class="language-r">df &lt;-
+  data %&gt;%
+  mutate(sentiment = map_int(review, happyorsad, &quot;da&quot;)) %&gt;%
+  mutate(review = tolower(review)) %&gt;%
+  mutate(review = removeWords(
+    review,
+    c(
+      &quot;så&quot;, &quot;3&quot;, &quot;kan&quot;, &quot;få&quot;, &quot;får&quot;, &quot;fik&quot;, &quot;nøie&quot;,
+      stopwords(&quot;danish&quot;)
+    )
+  ))
+</code></pre>
+<h2 id="distribution-of-sentiment-scores">Distribution of sentiment scores</h2>
+<p>In the density plot we see how sentiment scores are distributed with a median
+score of 2. This a really good score and it is of interst to find out <em>why</em>
+Nøie has a this great score and it also svore 4.5 rating out of 5.</p>
+<pre><code class="language-r">df %&gt;%
+  ggplot(aes(x = sentiment)) +
+  geom_density(size = 1) +
+  geom_vline(
+    xintercept = median(df$sentiment),
+    colour = &quot;indianred&quot;, linetype = &quot;dashed&quot;, size = 1
+  ) +
+  ggplot2::annotate(&quot;text&quot;,
+    x = 15, y = 0.06,
+    label = paste(&quot;median = &quot;, median(df$sentiment)), colour = &quot;indianred&quot;
+  ) +
+  my_theme() +
+  xlim(-40, 40)
+</code></pre>
+<p><img src="/post/2020-12-29-text-mining-nøie-trust-pilot-reviews/index.en_files/figure-html/unnamed-chunk-6-1.png" width="2400" /></p>
+<p>In a crude way we can put positive and negative reviews in separate data frames
+perform topic modelling on each in order to explore what reviewers lik and
+dislike.</p>
+<h2 id="topic-modelling-for-positive-reviews">Topic modelling for positive reviews</h2>
+<pre><code class="language-r">df_pos &lt;-
+  df %&gt;%
+  filter(sentiment &gt; 1) %&gt;%
+  unnest_tokens(word, review) %&gt;%
+  mutate(word = str_replace(word, &quot;cremen&quot;, &quot;creme&quot;)) %&gt;%
+  mutate(word = str_replace(word, &quot;cremer&quot;, &quot;creme&quot;)) %&gt;%
+  mutate(word = str_replace(word, &quot;cremejeg&quot;, &quot;creme&quot;)) %&gt;%
+  mutate(word = str_replace(word, &quot;cremene&quot;, &quot;creme&quot;))
+</code></pre>
+<p>Before creating a so called <strong>document term matrix</strong> we need to count the
+frequency of each word per document.</p>
+<pre><code class="language-r">words_pos &lt;- df_pos %&gt;%
+  count(reviewer, word, sort = TRUE) %&gt;%
+  ungroup()
+</code></pre>
+<p>We want to use the famouse <code>Latent Dirichlet Allocation</code> algorithme for topic
+modelling. To use this we need to create our DTM and here we use <code>tidytext</code> function
+<code>cast_dtm</code> to do that.</p>
+<pre><code class="language-r">reviewDTM_pos &lt;- words_pos %&gt;%
+  cast_dtm(reviewer, word, n)
+</code></pre>
+<p>LDA assumes that every document is a mixture of topics, and every topic is a
+mixture of words. The k argument is used to specify the desired amount of topics
+that we want in our model. Let´s create a two-topic mode.</p>
+<pre><code class="language-r">reviewLDA_pos &lt;- LDA(reviewDTM_pos, k = 3, control = list(seed = 123))
+</code></pre>
+<p>The following table shows how many reviews that are assigned to each topic</p>
+<pre><code class="language-r">tibble(topics(reviewLDA_pos)) %&gt;%
+  group_by(`topics(reviewLDA_pos)`) %&gt;%
+  count() %&gt;%
+  kable() %&gt;%
+  kable_styling(
+    full_width = FALSE,
+    position = &quot;left&quot;
+  )
+</code></pre>
+<table class="table" style="width: auto !important; ">
+ <thead>
+  <tr>
+   <th style="text-align:right;"> topics(reviewLDA_pos) </th>
+   <th style="text-align:right;"> n </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 50 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 29 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 30 </td>
+  </tr>
+</tbody>
+</table>
+<p>It is also possible to get the per-topic word probabilities or &lsquo;beta&rsquo;</p>
+<pre><code class="language-r">topics_pos &lt;- tidy(reviewLDA_pos, matrix = &quot;beta&quot;)
+topics_pos
+</code></pre>
+<pre><code>## # A tibble: 3,336 x 3
+##    topic term          beta
+##    &lt;int&gt; &lt;chr&gt;        &lt;dbl&gt;
+##  1     1 creme     0.0611  
+##  2     2 creme     0.0320  
+##  3     3 creme     0.0499  
+##  4     1 tak       0.000964
+##  5     2 tak       0.00569 
+##  6     3 tak       0.00600 
+##  7     1 hud       0.0216  
+##  8     2 hud       0.0229  
+##  9     3 hud       0.0275  
+## 10     1 produkter 0.0229  
+## # … with 3,326 more rows
+</code></pre>
+<p>Now we can find the words with the highest beta. Here we choose the top five
+words which we will show in a plot.</p>
+<pre><code class="language-r">top_terms_pos &lt;- topics_pos %&gt;%
+  group_by(topic) %&gt;%
+  top_n(5, beta) %&gt;%
+  ungroup() %&gt;%
+  arrange(topic, -beta) %&gt;%
+  mutate(order = rev(row_number()))
+</code></pre>
+<pre><code class="language-r"># plot_pos &lt;-
+top_terms_pos %&gt;%
+  ggplot(aes(order, beta)) +
+  ggtitle(&quot;Positive review topics&quot;) +
+  geom_col(show.legend = FALSE, fill = &quot;steelblue&quot;) +
+  scale_x_continuous(
+    breaks = top_terms_pos$order,
+    labels = top_terms_pos$term,
+    expand = c(0, 0)
+  ) +
+  facet_wrap(~topic, scales = &quot;free&quot;) +
+  coord_flip(ylim = c(0, 0.02)) +
+  my_theme() +
+  theme(axis.title = element_blank())
+</code></pre>
+<p><img src="/post/2020-12-29-text-mining-nøie-trust-pilot-reviews/index.en_files/figure-html/unnamed-chunk-14-1.png" width="2400" /></p>
+<h2 id="word-co-occurrence-within-reviews">Word co-occurrence within reviews</h2>
+<pre><code class="language-r">pairs_plot_pos &lt;- word_pairs_pos &lt;-
+  df_pos %&gt;%
+  pairwise_count(word, reviewer, sort = TRUE) %&gt;%
+  filter(n &gt;= 10) %&gt;%
+  graph_from_data_frame() %&gt;%
+  ggraph(layout = &quot;fr&quot;) +
+  geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = &quot;steelblue&quot;) +
+  ggtitle(&quot;Positive word pairs&quot;) +
+  geom_node_point(size = 5) +
+  geom_node_text(aes(label = name),
+    repel = TRUE,
+    point.padding = unit(0.2, &quot;lines&quot;)
+  ) +
+  my_theme() +
+  theme(
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+grid.arrange(pairs_plot_pos)
+</code></pre>
+<p><img src="/post/2020-12-29-text-mining-nøie-trust-pilot-reviews/index.en_files/figure-html/unnamed-chunk-15-1.png" width="2400" /></p>
+
+    </div>
+
+    
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/tidytext/">tidytext</a>
+  
+  <a class="badge badge-light" href="/tag/topic-models/">topic models</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=/post/text-mining-n%C3%B8ie-trust-pilot-reviews/&amp;text=Text%20mining%20-%20n%c3%b8ie%20trust%20pilot%20reviews" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=/post/text-mining-n%C3%B8ie-trust-pilot-reviews/&amp;t=Text%20mining%20-%20n%c3%b8ie%20trust%20pilot%20reviews" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Text%20mining%20-%20n%c3%b8ie%20trust%20pilot%20reviews&amp;body=/post/text-mining-n%C3%B8ie-trust-pilot-reviews/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=/post/text-mining-n%C3%B8ie-trust-pilot-reviews/&amp;title=Text%20mining%20-%20n%c3%b8ie%20trust%20pilot%20reviews" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://web.whatsapp.com/send?text=Text%20mining%20-%20n%c3%b8ie%20trust%20pilot%20reviews%20/post/text-mining-n%C3%B8ie-trust-pilot-reviews/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=/post/text-mining-n%C3%B8ie-trust-pilot-reviews/&amp;title=Text%20mining%20-%20n%c3%b8ie%20trust%20pilot%20reviews" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <img class="avatar mr-3 avatar-circle" src="/author/avatar_hudef16edbb344eea40e4cadaaa7f9e3da_333052_270x270_fill_q90_lanczos_center.jpg" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Lucas Bagge</a></h5>
+      <h6 class="card-subtitle">Jr. Data Scientist in Blackwood Seven</h6>
+      <p class="card-text">Data scientist student with interest in the applied neural network.</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:lucasbagge@hotmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://twitter.com/_bcullen" target="_blank" rel="noopener">
+        <i class="fab fa-twitter"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/brendanhcullen" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js" integrity="sha256-1zu+3BnLYV9LdiY85uXMzii3bdrkelyp37e0ZyTAQh0=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/r.min.js"></script>
+        
+      
+
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js" integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.a0d331bcd05dbe8b31e244f796710f08.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  
+  
+   
+  <script>
+  $(document).ready(function () {
+    window.initializeCodeFolding("show" === "hide");
+  });
+  </script>
+  <script src="/js/codefolding.js"></script>
+
+
+  <p class="powered-by">
+    © Isabella Benabaye, 2021 &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

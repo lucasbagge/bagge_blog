@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>tidytext | Lucas Bagge</title>
+    <link>/tag/tidytext/</link>
+      <atom:link href="/tag/tidytext/index.xml" rel="self" type="application/rss+xml" />
+    <description>tidytext</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Isabella Benabaye, 2021</copyright><lastBuildDate>Tue, 29 Dec 2020 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/sharing_image.jpg</url>
+      <title>tidytext</title>
+      <link>/tag/tidytext/</link>
+    </image>
+    
+    <item>
+      <title>Text mining - nøie trust pilot reviews</title>
+      <link>/post/text-mining-n%C3%B8ie-trust-pilot-reviews/</link>
+      <pubDate>Tue, 29 Dec 2020 00:00:00 +0000</pubDate>
+      <guid>/post/text-mining-n%C3%B8ie-trust-pilot-reviews/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In this analysis I am gonna scapes truspilot web page for reviews given by
+customer for the skincare firm Nøie.&lt;/p&gt;
+&lt;p&gt;Here I am gonna use the data to make some topic modelling.&lt;/p&gt;
+&lt;h2 id=&#34;web-scraping&#34;&gt;Web scraping&lt;/h2&gt;
+&lt;p&gt;For sciping the 
+&lt;a href=&#34;https://www.trustpilot.com/review/noie.com&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;trutpilot site&lt;/a&gt;
+&lt;/p&gt;
+&lt;p&gt;I am gonna make three functions: &lt;code&gt;get_ratings&lt;/code&gt;, &lt;code&gt;get_reviews&lt;/code&gt; and
+&lt;code&gt;get_reviewer_names&lt;/code&gt; and combine it into a tibble with &lt;code&gt;get_data&lt;/code&gt; to extract the
+data.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;get_ratings &amp;lt;- function(html) {
+  html %&amp;gt;%
+    read_html() %&amp;gt;%
+    html_nodes(&amp;quot;body&amp;quot;) %&amp;gt;%
+    html_nodes(&amp;quot;.star-rating&amp;quot;) %&amp;gt;%
+    as.character() %&amp;gt;%
+    str_subset(&amp;quot;medium&amp;quot;) %&amp;gt;%
+    str_extract(&amp;quot;(\\d stjerne)&amp;quot;) %&amp;gt;%
+    str_remove((&amp;quot;( stjerne)&amp;quot;)) %&amp;gt;%
+    unlist()
+}
+
+get_reviews &amp;lt;- function(html) {
+  html %&amp;gt;%
+    read_html() %&amp;gt;%
+    html_nodes(&amp;quot;.review-content__body&amp;quot;) %&amp;gt;%
+    html_text() %&amp;gt;%
+    str_trim() %&amp;gt;%
+    unlist()
+}
+
+get_reviewer_names &amp;lt;- function(html) {
+  html %&amp;gt;%
+    read_html() %&amp;gt;%
+    html_nodes(&amp;quot;.consumer-information__name&amp;quot;) %&amp;gt;%
+    html_text() %&amp;gt;%
+    str_trim() %&amp;gt;%
+    unlist()
+}
+
+get_data &amp;lt;- function(html) {
+  review &amp;lt;- get_reviews(html)
+  names &amp;lt;- get_reviewer_names(html)
+  ratings &amp;lt;- get_ratings(html)
+  data &amp;lt;- tibble(
+    reviewer = names,
+    rating = ratings,
+    review = review
+  )
+  data
+}
+
+urls &amp;lt;- cbind(c(url1, url2, url3, url4, url5, url6, url7))
+
+url_list &amp;lt;- map(urls, get_data) %&amp;gt;%
+  as.list()
+
+data &amp;lt;- do.call(bind_rows, url_list)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let us quick take a look at what I have extracted from the site:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;data %&amp;gt;%
+  head()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 x 3
+##   reviewer                rating review                                         
+##   &amp;lt;chr&amp;gt;                   &amp;lt;chr&amp;gt;  &amp;lt;chr&amp;gt;                                          
+## 1 Lars Jensen             5      &amp;quot;Gode produkter og super service. Skru ned for…
+## 2 Maria Cirkeline Rasmin… 5      &amp;quot;Super produkter\n                \n        \n…
+## 3 Lis                     1      &amp;quot;2 cremer gav endnu mere uren hud + ulovlig ma…
+## 4 Trine Holm              5      &amp;quot;Min hud slår altid ud om vinteren.\n         …
+## 5 Camilla                 1      &amp;quot;Min hud er værre end nogensinde\n            …
+## 6 Andrea Broe             5      &amp;quot;Stor anbefaling\n                \n        \n…
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We see the following information:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;reviewer&lt;/code&gt; that is the person that has used the product.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rating&lt;/code&gt; what the the reviewer has chosen to give the product on a scale from
+1-5.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;review&lt;/code&gt; is the comment given by the reviewer and the central aspect for this
+analysis.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In the next section I will drewll into into the preprocessig step for this text
+mining task.&lt;/p&gt;
+&lt;h2 id=&#34;loading-and-preparing-the-data&#34;&gt;Loading and preparing the data&lt;/h2&gt;
+&lt;p&gt;From the data we can see that the reviews are in Danish. Here we can use the &lt;code&gt;happyorsad&lt;/code&gt; package
+to compute a sentiment score for each review. Thease score are based on a Danish list of
+sentiment words and put toheather by 
+&lt;a href=&#34;https://www.dtu.dk/service/telefonbog/person?id=1755&amp;amp;cpid=&amp;amp;tab=1&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Finn Årup Nielsen&lt;/a&gt;
+&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;df &amp;lt;-
+  data %&amp;gt;%
+  mutate(sentiment = map_int(review, happyorsad, &amp;quot;da&amp;quot;)) %&amp;gt;%
+  mutate(review = tolower(review)) %&amp;gt;%
+  mutate(review = removeWords(
+    review,
+    c(
+      &amp;quot;så&amp;quot;, &amp;quot;3&amp;quot;, &amp;quot;kan&amp;quot;, &amp;quot;få&amp;quot;, &amp;quot;får&amp;quot;, &amp;quot;fik&amp;quot;, &amp;quot;nøie&amp;quot;,
+      stopwords(&amp;quot;danish&amp;quot;)
+    )
+  ))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;distribution-of-sentiment-scores&#34;&gt;Distribution of sentiment scores&lt;/h2&gt;
+&lt;p&gt;In the density plot we see how sentiment scores are distributed with a median
+score of 2. This a really good score and it is of interst to find out &lt;em&gt;why&lt;/em&gt;
+Nøie has a this great score and it also svore 4.5 rating out of 5.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;df %&amp;gt;%
+  ggplot(aes(x = sentiment)) +
+  geom_density(size = 1) +
+  geom_vline(
+    xintercept = median(df$sentiment),
+    colour = &amp;quot;indianred&amp;quot;, linetype = &amp;quot;dashed&amp;quot;, size = 1
+  ) +
+  ggplot2::annotate(&amp;quot;text&amp;quot;,
+    x = 15, y = 0.06,
+    label = paste(&amp;quot;median = &amp;quot;, median(df$sentiment)), colour = &amp;quot;indianred&amp;quot;
+  ) +
+  my_theme() +
+  xlim(-40, 40)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-12-29-text-mining-nøie-trust-pilot-reviews/index.en_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;2400&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;In a crude way we can put positive and negative reviews in separate data frames
+perform topic modelling on each in order to explore what reviewers lik and
+dislike.&lt;/p&gt;
+&lt;h2 id=&#34;topic-modelling-for-positive-reviews&#34;&gt;Topic modelling for positive reviews&lt;/h2&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;df_pos &amp;lt;-
+  df %&amp;gt;%
+  filter(sentiment &amp;gt; 1) %&amp;gt;%
+  unnest_tokens(word, review) %&amp;gt;%
+  mutate(word = str_replace(word, &amp;quot;cremen&amp;quot;, &amp;quot;creme&amp;quot;)) %&amp;gt;%
+  mutate(word = str_replace(word, &amp;quot;cremer&amp;quot;, &amp;quot;creme&amp;quot;)) %&amp;gt;%
+  mutate(word = str_replace(word, &amp;quot;cremejeg&amp;quot;, &amp;quot;creme&amp;quot;)) %&amp;gt;%
+  mutate(word = str_replace(word, &amp;quot;cremene&amp;quot;, &amp;quot;creme&amp;quot;))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Before creating a so called &lt;strong&gt;document term matrix&lt;/strong&gt; we need to count the
+frequency of each word per document.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;words_pos &amp;lt;- df_pos %&amp;gt;%
+  count(reviewer, word, sort = TRUE) %&amp;gt;%
+  ungroup()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We want to use the famouse &lt;code&gt;Latent Dirichlet Allocation&lt;/code&gt; algorithme for topic
+modelling. To use this we need to create our DTM and here we use &lt;code&gt;tidytext&lt;/code&gt; function
+&lt;code&gt;cast_dtm&lt;/code&gt; to do that.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;reviewDTM_pos &amp;lt;- words_pos %&amp;gt;%
+  cast_dtm(reviewer, word, n)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;LDA assumes that every document is a mixture of topics, and every topic is a
+mixture of words. The k argument is used to specify the desired amount of topics
+that we want in our model. Let´s create a two-topic mode.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;reviewLDA_pos &amp;lt;- LDA(reviewDTM_pos, k = 3, control = list(seed = 123))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The following table shows how many reviews that are assigned to each topic&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;tibble(topics(reviewLDA_pos)) %&amp;gt;%
+  group_by(`topics(reviewLDA_pos)`) %&amp;gt;%
+  count() %&amp;gt;%
+  kable() %&amp;gt;%
+  kable_styling(
+    full_width = FALSE,
+    position = &amp;quot;left&amp;quot;
+  )
+&lt;/code&gt;&lt;/pre&gt;
+&lt;table class=&#34;table&#34; style=&#34;width: auto !important; &#34;&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; topics(reviewLDA_pos) &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; n &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 50 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 2 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 29 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 3 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 30 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;It is also possible to get the per-topic word probabilities or &amp;lsquo;beta&amp;rsquo;&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;topics_pos &amp;lt;- tidy(reviewLDA_pos, matrix = &amp;quot;beta&amp;quot;)
+topics_pos
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 3,336 x 3
+##    topic term          beta
+##    &amp;lt;int&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;dbl&amp;gt;
+##  1     1 creme     0.0611  
+##  2     2 creme     0.0320  
+##  3     3 creme     0.0499  
+##  4     1 tak       0.000964
+##  5     2 tak       0.00569 
+##  6     3 tak       0.00600 
+##  7     1 hud       0.0216  
+##  8     2 hud       0.0229  
+##  9     3 hud       0.0275  
+## 10     1 produkter 0.0229  
+## # … with 3,326 more rows
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can find the words with the highest beta. Here we choose the top five
+words which we will show in a plot.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;top_terms_pos &amp;lt;- topics_pos %&amp;gt;%
+  group_by(topic) %&amp;gt;%
+  top_n(5, beta) %&amp;gt;%
+  ungroup() %&amp;gt;%
+  arrange(topic, -beta) %&amp;gt;%
+  mutate(order = rev(row_number()))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;# plot_pos &amp;lt;-
+top_terms_pos %&amp;gt;%
+  ggplot(aes(order, beta)) +
+  ggtitle(&amp;quot;Positive review topics&amp;quot;) +
+  geom_col(show.legend = FALSE, fill = &amp;quot;steelblue&amp;quot;) +
+  scale_x_continuous(
+    breaks = top_terms_pos$order,
+    labels = top_terms_pos$term,
+    expand = c(0, 0)
+  ) +
+  facet_wrap(~topic, scales = &amp;quot;free&amp;quot;) +
+  coord_flip(ylim = c(0, 0.02)) +
+  my_theme() +
+  theme(axis.title = element_blank())
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-12-29-text-mining-nøie-trust-pilot-reviews/index.en_files/figure-html/unnamed-chunk-14-1.png&#34; width=&#34;2400&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;word-co-occurrence-within-reviews&#34;&gt;Word co-occurrence within reviews&lt;/h2&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;pairs_plot_pos &amp;lt;- word_pairs_pos &amp;lt;-
+  df_pos %&amp;gt;%
+  pairwise_count(word, reviewer, sort = TRUE) %&amp;gt;%
+  filter(n &amp;gt;= 10) %&amp;gt;%
+  graph_from_data_frame() %&amp;gt;%
+  ggraph(layout = &amp;quot;fr&amp;quot;) +
+  geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = &amp;quot;steelblue&amp;quot;) +
+  ggtitle(&amp;quot;Positive word pairs&amp;quot;) +
+  geom_node_point(size = 5) +
+  geom_node_text(aes(label = name),
+    repel = TRUE,
+    point.padding = unit(0.2, &amp;quot;lines&amp;quot;)
+  ) +
+  my_theme() +
+  theme(
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+grid.arrange(pairs_plot_pos)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-12-29-text-mining-nøie-trust-pilot-reviews/index.en_files/figure-html/unnamed-chunk-15-1.png&#34; width=&#34;2400&#34; /&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

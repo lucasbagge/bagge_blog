@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>/categories/</loc>
+    <lastmod>2020-12-29T22:49:57+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2020-12-29T22:49:57+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2020-12-29T22:49:57+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-12-29T22:49:57+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/category/text-mining/</loc>
+    <lastmod>2020-12-29T22:49:57+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/text-mining-n%C3%B8ie-trust-pilot-reviews/</loc>
+    <lastmod>2020-12-29T22:49:57+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tag/tidytext/</loc>
+    <lastmod>2020-12-29T22:49:57+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tag/topic-models/</loc>
+    <lastmod>2020-12-29T22:49:57+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/project/master_of_the_tidyverse/</loc>
+    <lastmod>2020-12-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/project/</loc>
+    <lastmod>2020-12-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tag/r/</loc>
+    <lastmod>2020-12-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/2020-06-02-tidymodels-decision-tree-learning-in-r/</loc>
+    <lastmod>2020-06-02T10:57:23-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/project/qe/</loc>
+    <lastmod>2020-04-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tag/economics/</loc>
+    <lastmod>2020-04-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/category/logistic-regression/</loc>
+    <lastmod>2020-05-17T20:19:54+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tag/ml/</loc>
+    <lastmod>2020-05-17T20:19:54+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tag/parship/</loc>
+    <lastmod>2020-05-17T20:19:54+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/category/parship/</loc>
+    <lastmod>2020-05-17T20:19:54+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tag/random-forest/</loc>
+    <lastmod>2020-05-17T20:19:54+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/category/random-forest/</loc>
+    <lastmod>2020-05-17T20:19:54+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tag/tidymodels/</loc>
+    <lastmod>2020-05-17T20:19:54+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/category/tidymodels/</loc>
+    <lastmod>2020-05-17T20:19:54+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/tidymodels-and-parsnip/</loc>
+    <lastmod>2020-05-17T20:19:54+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/slides/</loc>
+    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/slides/example/</loc>
+    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/contact/</loc>
+    <lastmod>2019-01-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/project_landing/</loc>
+    <lastmod>2019-01-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/author/</loc>
+  </url>
+  
+  <url>
+    <loc>/authors/</loc>
+  </url>
+  
+  <url>
+    <loc>/publication_types/</loc>
+  </url>
+  
+  <url>
+    <loc>/publication/</loc>
+  </url>
+  
+</urlset>
