@@ -41,6 +41,10 @@ subtitle = "An assortment of different projects I have worked on during my time 
   [[content.filter_button]]
     name = "Economics"
     tag = "Economics"
+    
+  [[content.filter_button]]
+    name = "Ørsted"
+    tag = "Ørsted"
 
 [design]
   # Choose how many columns the section has. Valid values: 1 or 2.
