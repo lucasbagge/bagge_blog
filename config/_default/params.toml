@@ -9,20 +9,20 @@
 #   Latest themes (may require updating): https://sourcethemes.com/academic/themes/
 #   Browse built-in themes in `themes/academic/data/themes/`
 #   Browse user installed themes in `data/themes/`
-theme = "my_theme"
+theme = "julia"
 
 # Enable users to switch between day and night mode?
-day_night = true
+day_night = false
 
 # Override the theme's font set (optional).
 #   Latest font sets (may require updating): https://sourcethemes.com/academic/themes/
 #   Browse built-in font sets in `themes/academic/data/fonts/`
 #   Browse user installed font sets in `data/fonts/`
-font = "my_font_set"
+font = ""
 
 # Choose a font size.
 # Sizes: XS (extra small), S (small), M (medium), L (large - DEFAULT), XL (extra large)
-font_size = ""
+font_size = "M"
 
 ############################
 ## Basic Info
@@ -44,7 +44,7 @@ local_business_type = ""
 org_name = ""
 
 # Description for social sharing and search engines. If undefined, superuser role is used in place.
-description = "Brendan Cullen's personal website"
+description = "A data science blog by Julia Silge"
 
 ############################
 ## Site Features
@@ -54,7 +54,7 @@ description = "Brendan Cullen's personal website"
 # Documentation: https://sourcethemes.com/academic/docs/writing-markdown-latex/#highlighting-options
 highlight = true
 highlight_languages = ["r"]  # Add support for highlighting additional languages
-# highlight_style = "github"  # For supported styles, see https://cdnjs.com/libraries/highlight.js/
+highlight_style = "tomorrow"  # For supported styles, see https://cdnjs.com/libraries/highlight.js/
 
 # Enable LaTeX math rendering? true/false
 #   If false, you can enable math on a per page basis as needed.
@@ -71,18 +71,7 @@ privacy_pack = false
 
 # Enable visitors to edit pages?
 #   `repo` defines the repository URL. `editable` defines which page types can be edited.
-edit_page = {repo_url = "https://github.com/gcushen/hugo-academic", content_dir = "", repo_branch = "master", editable = {docs = true, page = false, post = false}}
-
-############################
-## Code folding
-############################
-
-# Set to true to disable code folding
-disable_codefolding = true
-# Set to "hide" or "show" all codes by default
-codefolding_show = "hide"
-# Set to true to exclude the "Show/hide all" button
-codefolding_nobutton = false
+edit_page = {repo_url = "https://github.com/juliasilge/academic_blog", content_dir = "", repo_branch = "master", editable = {docs = false, page = false, post = false}}
 
 ############################
 ## Contact details
@@ -92,20 +81,9 @@ codefolding_nobutton = false
 ############################
 
 # Enter contact details (optional). To hide a field, clear it to "".
-email = "lucasbagge@hotmail.com"
-#phone = ""
-#address = ""
+email = ""
+phone = ""
 
-# Geographic coordinates
-# To get your coordinates, right-click on Google Maps and choose "What's here?". The coords will show up at the bottom.
-#coordinates = {latitude = "37.4275", longitude = "-122.1697"}
-
-# Directions for visitors to locate you.
-directions = ""
-
-# Office hours
-# A list of your office hours. To remove, set to an empty list `[]`.
-office_hours = []
 
 # Enter an optional link for booking appointments (e.g. calendly.com).
 appointment_url = ""
@@ -113,9 +91,8 @@ appointment_url = ""
 # Contact links
 #   Set to `[]` to disable, or comment out unwanted lines with a hash `#`.
 contact_links = [
-  {icon = "twitter", icon_pack = "fab", name = "Message me on Twitter", link = "https://twitter.com/lucasbagge"},
-  #{icon = "skype", icon_pack = "fab", name = "Skype Me", link = "skype:echo123?call"},
-  #{icon = "keybase", icon_pack = "fab", name = "Chat on Keybase", link = "https://keybase.io/"},
+  {icon = "twitter", icon_pack = "fab", name = "Twitter", link = "https://twitter.com/juliasilge"},
+  {icon = "keybase", icon_pack = "fab", name = "Chat on Keybase", link = "https://keybase.io/"},
   #{icon = "comments", icon_pack = "fas", name = "Discuss on Forum", link = "https://discourse.gohugo.io"},
   # {icon = "telegram", icon_pack = "fab", name = "Telegram Me", link = "https://telegram.me/@Telegram"},
   ]
@@ -125,11 +102,10 @@ contact_links = [
 ############################
 
 # Default image for social sharing and search engines. Place image in `static/img/` folder and specify image name here.
-sharing_image = "sharing_image.jpg"
-twitter_image = "sharing_image.jpg"
+sharing_image = "sharon-mccutcheon-62vi3TG5EDg-unsplash_small.jpg"
 
 # Twitter username (without @). Used when a visitor shares your site on Twitter.
-twitter = "_lucasbagge"
+twitter = "juliasilge"
 
 ############################
 ## Regional Settings
@@ -159,10 +135,13 @@ section_pager = false
 docs_section_pager = true  # Display pager in Docs layout (e.g. tutorials)?
 
 # Enable in-built social sharing buttons? (true/false)
-sharing = true
+sharing = false
 
 # Link authors to their profile page? (true/false)
 link_authors = true
+
+# Abstract length (characters) in the Compact and Portfolio Card list views. Also, see `summaryLength` in `config.toml`.
+abstract_length = 135
 
 # Load JS plugins
 #   E.g. To load `/assets/js/custom.js`, set `plugins_js = ["custom"]`.
@@ -178,33 +157,6 @@ plugins_js  = []
   # Choose a shape for avatar images. Options: circle, square.
   shape = "circle"
 
-# Available address formats.
-[address_formats]
-  en-us = {order = ['street', 'city', 'region', 'postcode'], delimiters = [', ', ', ', ' ', '']}
-  en-gb = {order = ['street', 'city', 'region', 'postcode'], delimiters = [', ', ', ', ', ', '']}
-  de = {order = ['street', 'postcode', 'city'], delimiters = ['<br>', ' ', '']}
-  fr-fr = {order = ['street', 'postcode', 'city'], delimiters = ['<br>', ' ', '']}
-  zh = {order = ['postcode', 'region', 'city', 'street'], delimiters = [' ', ' ', ' ', '']}
-
-# Configuration of publication pages.
-[publications]
-  # Date format (refer to https://sourcethemes.com/academic/docs/customization/#date-format )
-  #   Examples: "Mon, Jan 2, 2006" or "2006-01-02"
-  date_format = "January 2006"
-
-  # Citation style ("apa" or "mla")
-  citation_style = "apa"
-
-# Configuration of project pages.
-[projects]
-  # Views for associated content.
-  #   1: List
-  #   2: Compact
-  #   3: Card
-  #   4: Citation (publications only)
-  post_view = 2
-  publication_view = 2
-  talk_view = 2
 
 ############################
 ## Comments
@@ -214,14 +166,14 @@ plugins_js  = []
   #   0: Disabled
   #   1: Disqus (https://disqus.com)
   #   2: Commento (https://commento.io)
-  engine = 0
+  engine = 1
 
   # Which page types are commentable?
-  commentable = {page = true, post = true, docs = true, project = true, publication = true, talk = true}
+  commentable = {page = false, blog = true}
 
   # Configuration of Disqus.
   [comments.disqus]
-    shortname = ""  # Paste the shortname from your Disqus dashboard.
+    shortname = "datascienceish"  # Paste the shortname from your Disqus dashboard.
     show_count = true  # Show comment count in page header? (true/false)
 
   # Configuration of Commento.
@@ -247,31 +199,17 @@ plugins_js  = []
     index_name = ""
     show_logo = false
 
-############################
-## Maps
-############################
-[map]
-  # To show your address on a map in the Contact widget, enter your latitude and longitude (above)
-  # and choose a map provider below.
-  #
-  # To use Google Maps, set `engine` to 1 and enter your API key that can be obtained here:
-  #   https://developers.google.com/maps/documentation/javascript/get-api-key
-  # To use OpenStreetMap tiles, set `engine` to 2.
-  # To use OpenStreetMap on a high traffic site, set `engine` to 3 and enter your API key that can be obtained here:
-  #   https://www.mapbox.com/studio/account/tokens
-  #
-  # Map provider:
-  #   0: No map
-  #   1: Google Maps
-  #   2: OpenStreetMap (Mapnik)
-  #   3: OpenStreetMap (Mapbox)
-  engine = 2
-  api_key = ""
-  zoom = 15
 
 ############################
 ## Marketing
 ############################
 [marketing]
-  google_analytics = ""
+  google_analytics = "UA-68765210-1"
   google_tag_manager = ""
+
+############################
+## Content Management System
+############################
+[cms]
+  # See https://sourcethemes.com/academic/docs/install/#install-with-web-browser
+  netlify_cms = true

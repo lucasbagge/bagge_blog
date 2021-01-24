@@ -1,55 +1,44 @@
 ---
 authors:
 - admin
-bio: Hi my name is Lucas and I love Data Science, math and programming.
-education:
-  courses:
-  - course: Data science
-    institution: AU
-    year: 2021
-  - course: BA - Economics
-    institution: SDU
-    year: 2019
-email: "lucasbagge@hotmail.com"
-interests:
-- Data Science education
-- R & R Markdown
-- Neural network
-- Baysian statistick
-- Shiny
-- Movies
-- Marketing
-- Media analysis
-- Energy
-- Machine Learning
-name: Lucas Bagge
+bio: I'm an author, international keynote speaker, and real-world practitioner focusing on data analysis and machine learning practice. I love making beautiful charts and communicating about technical topics with diverse audiences.
+email: ""
 organizations:
-- name: Lucas Bagge
-role: Jr. Data Scientist in Blackwood Seven
+- name: RStudio PBC
+  url: "https://rstudio.com/"
+role: Data Scientist & Software Engineer
 social:
-- icon: envelope
-  icon_pack: fas
-  link: mailto:lucasbagge@hotmail.com
 - icon: twitter
   icon_pack: fab
-  link: https://twitter.com/lucasbagge
+  link: https://twitter.com/juliasilge
 - icon: github
   icon_pack: fab
-  link: https://github.com/lucasbagge/bagge_blog
-
+  link: https://github.com/juliasilge
+- icon: youtube
+  icon_pack: fab
+  link: https://www.youtube.com/juliasilge
+- icon: stack-overflow
+  icon_pack: fab
+  link: https://stackoverflow.com/users/5468471/julia-silge
+- icon: linkedin
+  icon_pack: fab
+  link: https://www.linkedin.com/in/juliasilge/
+- icon: orcid
+  icon_pack: ai
+  link: https://orcid.org/0000-0002-3671-836X
+- icon: google-scholar
+  icon_pack: ai
+  link: https://scholar.google.com/citations?hl=en&user=lQBVIkkAAAAJ
 superuser: true
-user_groups:
-- Researchers
-- Visitors
+title: Julia Silge
 ---
 
-I am a passionate Data Scientist with key interest in how to apply data science
-toolbox in a business and public manner. I have a lot of experience in the
-energy sector and Media Marketing which I have gotten from my jobs at `Ørsted`,
-`Annalect` and `Blackwoodseven`.
+My name is Julia Silge and I am a data scientist and software engineer at RStudio where I work on [open source modeling tools](https://www.tidymodels.org/). My last name is pronounced SILL-GHEE (two syllables, short `i`, hard `g`). I love making beautiful charts, the statistical programming language R, Jane Austen, black coffee, and red wine.
 
-As path of my self education I am pursuing every possible data science channels
-at `kaggle` or similar datawarehouses places. 
+I studied physics and astronomy, finishing my PhD in 2005. I worked in academia (teaching and doing research) and ed tech before moving into data science and discovering R. I am both an international speaker and a real-world practitioner focusing on data analysis and machine learning practice. I have written books with my collaborators about [text mining](http://amzn.to/2tZkmxG), [supervised machine learning for text](https://smltar.com/), and [modeling with tidy data principles](https://www.tmwr.org/) in R. You can find me on [Twitter](https://twitter.com/juliasilge) and [GitHub](https://github.com/juliasilge). 
 
-I am always looking for new at hardere challenges regarding buiding models, tell
-story though data where I use `Shiny` as my great visual tool.
+I live in Salt Lake City, UT, with my husband, three kids, and two cats.
+
+This blog is built with [blogdown](https://github.com/rstudio/blogdown) and [Hugo](https://gohugo.io/), and deployed using [Netlify](https://www.netlify.com/). My blog posts are released under a [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/). Bokeh circles photo by [Sharon McCutcheon](https://unsplash.com/photos/62vi3TG5EDg) on Unsplash.
+
+If my blog has helped you, [you can buy me a coffee on Ko-fi!](https://ko-fi.com/U7U4WG9B) 
