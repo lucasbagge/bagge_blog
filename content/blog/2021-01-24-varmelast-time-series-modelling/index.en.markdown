@@ -3,11 +3,11 @@ title: Varmelast
 author: Lucas Bagge
 date: '2021-01-24'
 slug: varmelast
-categories: []
-tags: []
-subtitle: ''
-summary: ''
-authors: []
+categories: [Time Series]
+tags: [Xgboost, machine learning, prophet]
+subtitle: 'Here I am gonna extract time series data from a site and make different models'
+summary: 'If you want to use tidyverse to make time series models the ´timetk´ is a great tool for that'
+authors: [Lucas Bagge]
 lastmod: '2021-01-24T22:50:11+01:00'
 featured: no
 image:
@@ -631,10 +631,6 @@ calibration_table %>%
 </tbody>
 </table>
 
-```r
-  #table_modeltime_accuracy(.interactive = FALSE)
-```
-
 ## Analyse result
 
 
@@ -663,11 +659,6 @@ calibration_table %>%
 ```
 ## Disabling yearly seasonality. Run prophet with yearly.seasonality=TRUE to override this.
 ## Disabling yearly seasonality. Run prophet with yearly.seasonality=TRUE to override this.
-```
-
-```
-## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning -
-## Inf
 ```
 
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-22-1.png" width="672" />
