@@ -54,7 +54,7 @@ subtitle = ""
 #### Jr. Data Scientist & Data Manager, Blackwoodseven
 2020-present
 
-* I am responsiable for making the data ready for the models. This means making sure there is the
+* I am responsible for making the data ready for the models. This means making sure there is the
   right dimensions, updated data and correct mappings. The primary tools a `redash` and `python` for
   making data check and building script for data transformation.
 * The second path for me is building the models with a Baysiansk framework. Here we rely on `stan` and
