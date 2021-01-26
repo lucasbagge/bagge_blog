@@ -20,17 +20,6 @@ projects: []
 ---
 
 
-
-
-Lately I've been publishing [screencasts](https://juliasilge.com/category/tidymodels/) demonstrating how to use the [tidymodels](https://www.tidymodels.org/) framework, starting from just getting started. Today's screencast explores a more advanced topic in how to tune an XGBoost classification model using with this week's [`#TidyTuesday` dataset](https://github.com/rfordatascience/tidytuesday) on beach volleyball. 🏐
-
-<!--html_preserve-->{{% youtube "hpudxAmxHSM" %}}<!--/html_preserve-->
-
-</br>
-
-Here is the code I used in the video, for those who prefer reading instead of or in addition to video.
-
-
 ## Explore the data
 
 Our modeling goal is to predict whether a beach volleyball team of two won their match based on [game play stats like errors, blocks, attacks, etc from this week's #TidyTuesday dataset](https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-05-19/readme.md) . This dataset is quite extensive so it's a great opportunity to try a more powerful machine learning algorithm like XGBoost. This model has lots of tuning parameters!
@@ -123,8 +112,6 @@ losers <- vb_parsed %>%
 vb_df <- bind_rows(winners, losers) %>%
   mutate_if(is.character, factor)
 ```
-
-This is a similar [data prep approach to Joshua Cook](https://twitter.com/JoshDoesa/status/1262738031636672516).
 
 Exploratory data analysis is always important before modeling. Let's make one plot to explore the relationships in this data.
 
