@@ -1,0 +1,530 @@
+---
+title: Nøie review analysis from Trustpilot
+author: Lucas Bagge
+date: '2021-01-02'
+slug: test
+categories: []
+tags: []
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-01-02T12:58:05+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+<script src="{{< blogdown/postref >}}index.en_files/kePrint/kePrint.js"></script>
+<link href="{{< blogdown/postref >}}index.en_files/lightable/lightable.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index.en_files/kePrint/kePrint.js"></script>
+<link href="{{< blogdown/postref >}}index.en_files/lightable/lightable.css" rel="stylesheet" />
+
+
+
+
+
+
+## Introduction
+
+Trustpilot is a site where user can give a review of different products.
+The reviews can reveal some essentiel details about the products and
+service. This can be beneficial for the company to track and analysis
+the reviews. When there is a lot of reviews it can be hard to keep
+track of the information. Therefore NPL can be useful in such 
+circumstances.
+
+As an example I am gonna use the Nøie reviews to build a topic model to see 
+what is the genreal topics for good and bad reviews.
+
+## Web scraping
+
+For scraping the [trutpilot site](https://www.trustpilot.com/review/noie.com)
+I am gonna use the browser chrome to look behind the site to look for what
+data I need to scrape:
+
+![](chrome_site.png)
+
+
+
+
+There is multiple pages of reviews so I am gonna make some general functions
+to extract the following variables:
+  
+-   `get_ratings`
+
+-   `get_reviews`
+
+-   `get_reviewer_names`
+
+and combine it into a tibble with `get_data`.
+
+
+```r
+get_ratings <- function(html) {
+  html %>%
+    read_html() %>%
+    html_nodes("body") %>%
+    html_nodes(".star-rating") %>%
+    as.character() %>%
+    str_subset("medium") %>%
+    str_extract("(\\d stjerne)") %>%
+    str_remove(("( stjerne)")) %>%
+    unlist()
+}
+
+get_reviews <- function(html) {
+  html %>%
+    read_html() %>%
+    html_nodes(".review-content__body") %>%
+    html_text() %>%
+    str_trim() %>%
+    unlist()
+}
+
+get_reviewer_names <- function(html) {
+  html %>%
+    read_html() %>%
+    html_nodes(".consumer-information__name") %>%
+    html_text() %>%
+    str_trim() %>%
+    unlist()
+}
+
+get_data <- function(html) {
+  review <- get_reviews(html)
+  names <- get_reviewer_names(html)
+  ratings <- get_ratings(html)
+  data <- tibble(
+    reviewer = names,
+    rating = ratings,
+    review = review
+  )
+  return(data)
+}
+
+urls <- cbind(c(url1, url2, url3, url4, url5, url6, url7))
+
+url_list <- map(urls, get_data) %>%
+  as.list()
+
+data <- do.call(bind_rows, url_list)
+```
+
+
+We see the following information:
+  
+-   `reviewer` the user of the product.
+-   `rating` what the  reviewer has chosen to give the product on a
+    scale from 1-5.
+-   `review` is the comment given by the reviewer and the central aspect
+    for this analysis.
+
+Before we can begin the modelling process we need to preprocess the data.
+When dealing with unstructred data such as text data the modeller need to 
+use a great amount of time for making the data ready. 
+
+## Loading and preparing the data
+
+From the data we can see that the reviews are in Danish. Here we can use
+the `happyorsad` package to compute a sentiment score for each review.
+The scores are based on a Danish list of sentiment words and put
+toheather by 
+[Finn Årup Nielsen](https://www.dtu.dk/service/telefonbog/person?id=1755&cpid=&tab=1)
+
+We are also going to remove numbers, punctuation and stopwords.
+
+
+```r
+df <-
+  data %>%
+  mutate(sentiment = map_int(review, happyorsad, "da")) %>%
+  mutate(review = tolower(review)) %>%
+  mutate(
+    review = removeWords(
+      review,
+      c(
+        "så", "lidt", "virkelig",
+        "virkelig", "fuldstændig", "helt", "mere",
+        "kan", "få", "får", "fik", "nøie",
+        "altså", "gav", "endnu",
+        "sagde", "ingen", "flere",
+        stopwords("danish")
+      )
+    ),
+    review = removeNumbers(review)
+  )
+```
+
+## Distribution of sentiment scores
+
+In the density plot we see how sentiment scores are distributed with a
+median score of 8. This a really good score and it is of interst to find
+out *why*.
+
+
+```r
+df %>%
+  ggplot(aes(x = sentiment)) +
+  geom_density(size = 1) +
+  geom_vline(
+    xintercept = median(df$sentiment),
+    colour = "indianred", linetype = "dashed", size = 1
+  ) +
+  annotate("text",
+    x = 15, y = 0.06, label = paste(
+      "median = ",
+      median(df$sentiment)
+    ),
+    colour = "indianred"
+  ) +
+  my_theme() +
+  xlim(-40, 40)
+```
+
+<img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-5-1.png" width="2400" />
+
+In a crude way we can put positive and negative reviews in separate data
+frames perform topic modelling on each in order to explore what
+reviewers lik and dislike.
+
+## Topic modelling for positive reviews
+
+I start with the positive reviews where I am going to tokenized the data frame
+which mean one is going to break the text into words so every words can be
+analyze individually. 
+
+
+```r
+df_pos <-
+  df %>%
+  filter(sentiment > 1) %>%
+  unnest_tokens(word, review) %>%
+  mutate(word = str_replace(word, "cremen", "creme")) %>%
+  mutate(word = str_replace(word, "cremer", "creme")) %>%
+  mutate(word = str_replace(word, "cremejeg", "creme")) %>%
+  mutate(word = str_replace(word, "cremene", "creme"))
+```
+
+Before creating a so called **document term matrix** we need to count
+the frequency of each word per document.
+
+
+```r
+words_pos <- df_pos %>%
+  count(reviewer, word, sort = TRUE) %>%
+  ungroup()
+```
+
+We want to use the famouse `Latent Dirichlet Allocation` algorithme for
+Topic modelling. To use this we need to create our DTM and here we use
+`tidytext` function `cast_dtm` to do that.
+
+
+```r
+reviewDTM_pos <- words_pos %>%
+  cast_dtm(reviewer, word, n)
+```
+
+LDA assumes that every document is a mixture of topics, and every topic
+is a mixture of words. The `k` argument is used to specify the desired
+amount of topics that we want in our model. Let´s create a two-topic
+mode.
+
+
+```r
+reviewLDA_pos <- LDA(reviewDTM_pos, k = 2, control = list(seed = 123))
+```
+
+The following table shows how many reviews that are assigned to each
+topic
+
+
+```r
+tibble(topics(reviewLDA_pos)) %>%
+  group_by(`topics(reviewLDA_pos)`) %>%
+  count() %>%
+  kable(col.names = c("Positive reviews", "#")) %>%
+  kable_styling(
+    full_width = FALSE,
+    position = "left"
+  )
+```
+
+<table class="table" style="width: auto !important; ">
+ <thead>
+  <tr>
+   <th style="text-align:right;"> Positive reviews </th>
+   <th style="text-align:right;"> # </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 76 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 34 </td>
+  </tr>
+</tbody>
+</table>
+
+It is also possible to get the per-topic word probabilities or 'beta'
+
+
+```r
+topics_pos <- tidy(reviewLDA_pos, matrix = "beta")
+```
+
+Now we can find the words with the highest beta. Here we choose the top
+five words which we will show in a plot.
+
+
+```r
+top_terms_pos <- topics_pos %>%
+  group_by(topic) %>%
+  top_n(5, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>%
+  mutate(order = rev(row_number()))
+```
+
+## Topic modelling for negative reviews
+
+Let us see what can be said regarding the negativ reviews where the
+sentiment score is below -1
+
+
+```r
+df_neg <-
+  df %>%
+  filter(sentiment < -1) %>%
+  unnest_tokens(word, review) %>%
+  mutate(word = str_replace(word, "cremen", "creme")) %>%
+  mutate(word = str_replace(word, "cremer", "creme")) %>%
+  mutate(word = str_replace(word, "cremejeg", "creme")) %>%
+  mutate(word = str_replace(word, "cremene", "creme"))
+
+words_neg <- df_neg %>%
+  count(reviewer, word, sort = TRUE) %>%
+  ungroup()
+
+reviewDTM_neg <- words_neg %>%
+  cast_dtm(reviewer, word, n)
+
+reviewLDA_neg <- LDA(reviewDTM_neg, k = 2, control = list(seed = 347))
+
+tibble(topics(reviewLDA_neg)) %>%
+  group_by(`topics(reviewLDA_neg)`) %>%
+  count() %>%
+  kable(col.names = c("Negative reviews", "#")) %>%
+  kable_styling(full_width = FALSE, position = "left")
+```
+
+<table class="table" style="width: auto !important; ">
+ <thead>
+  <tr>
+   <th style="text-align:right;"> Negative reviews </th>
+   <th style="text-align:right;"> # </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+</tbody>
+</table>
+
+
+```r
+topics_neg <- tidy(reviewLDA_neg, matrix = "beta")
+
+topTerms_neg <- topics_neg %>%
+  group_by(topic) %>%
+  top_n(5, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>%
+  mutate(order = rev(row_number()))
+```
+
+## Plotting the topic models
+
+Now what the models are on made we can make a plot to make a comparison.
+
+
+```r
+plot_pos <-
+  top_terms_pos %>%
+  ggplot(aes(order, beta)) +
+  ggtitle("Positive review topics") +
+  geom_col(show.legend = FALSE, fill = "steelblue") +
+  scale_x_continuous(
+    breaks = top_terms_pos$order,
+    labels = top_terms_pos$term,
+    expand = c(0, 0)
+  ) +
+  facet_wrap(~topic, scales = "free") +
+  coord_flip(ylim = c(0, 0.02)) +
+  my_theme() +
+  theme(axis.title = element_blank())
+
+plot_neg <- topTerms_neg %>%
+  ggplot(aes(order, beta, fill = factor(topic))) +
+  ggtitle("Negative review topics") +
+  geom_col(show.legend = FALSE, fill = "indianred") +
+  scale_x_continuous(
+    breaks = topTerms_neg$order,
+    labels = topTerms_neg$term,
+    expand = c(0, 0)
+  ) +
+  facet_wrap(~topic, scales = "free") +
+  coord_flip(ylim = c(0, 0.02)) +
+  my_theme() +
+  theme(axis.title = element_blank())
+
+grid.arrange(plot_pos, plot_neg, ncol = 1)
+```
+
+<img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-15-1.png" width="2400" />
+
+So with the above plots we get a feeling on what the reviewer like and dislike
+regarding Nøie product and brand.
+
+As a general notice we are dealing with a really small dataset so this give
+us some touble sepecially for the negative reviews where there is fewer (a good
+sign for Nøie).
+
+Looking for the positive reviews:
+
+1. The *creme* gives a nice skin and the service is really great.
+2. The producs is good and give a super skin.
+
+As mention the problem with the nagative reviews is the sparsity of data.
+
+1. The creme gives impurities and zits. 
+2. Some reviewer think the marketing is bad.
+
+Interestingly, customers seem to have both positive and negative experiences with
+respect to pretty much the same topics. Some customers appear to experience good 
+result from the creme, whereas others seem to complain.
+
+This can be explored further.
+
+## Word co-occurrence within reviews
+
+To see whether word paris like "bad creame" and "good creme" are
+frequent in the data sets, we´ll count how many times each pair of words
+occurs togeather in a title or description field. This can easy be done
+with `pairwise_count()` function.
+
+
+```r
+word_pairs_pos <- df_pos %>%
+  pairwise_count(word, reviewer, sort = TRUE)
+
+word_pairs_neg <- df_neg %>%
+  pairwise_count(word, reviewer, sort = TRUE)
+```
+
+We can then plot the most common word pairs co-occurring in the reviews
+by means of the `igraph` and `ggraph` packages.
+
+
+```r
+pair_wise_helper <- function(data, title, color) {
+  data %>%
+    graph_from_data_frame() %>%
+    ggraph(layout = "fr") +
+    geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = color) +
+    ggtitle(title) +
+    geom_node_point(size = 5) +
+    geom_node_text(aes(label = name),
+      repel = TRUE,
+      point.padding = unit(0.2, "lines")
+    ) +
+    my_theme() +
+    theme(
+      axis.title = element_blank(),
+      axis.text = element_blank(),
+      axis.ticks = element_blank()
+    )
+}
+```
+
+
+```r
+pairs_plot_pos <-
+  pair_wise_helper(
+    word_pairs_pos %>% filter(n >= 15),
+    "Positive word pairs",
+    "steelblue"
+  )
+
+pairs_plot_neg <-
+  pair_wise_helper(
+    word_pairs_neg %>% filter(n > 2),
+    "Negative word pairs",
+    "indianred"
+  )
+
+grid.arrange(pairs_plot_pos, pairs_plot_neg, ncol = 2)
+```
+
+<img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-17-1.png" width="2400" />
+
+In the positive reviews, it is clear that the word for “creme” tends to co-occur
+with the word for “hud” and “god”. In the negative reviews, we can se there is
+not enough data for making any clearness regarding the co-occurance of words.
+
+## Word pair correlations
+
+Aanother interesting idea is to measure the correlation for specific
+words. Here I only look at the positiv dataset because there are to few
+observation in the negative one.
+
+> As an alternative idea is to perform an n-gram analysis to find out
+> which words most frequently are used.
+
+
+```r
+cor_pos <-
+  df_pos %>%
+  group_by(word) %>%
+  filter(n() >= 10) %>%
+  pairwise_cor(word, reviewer, sort = TRUE) %>%
+  filter(item1 == "creme") %>%
+  top_n(7) %>%
+  mutate(
+    item1 = as.factor(item1),
+    order = rev(row_number())
+  )
+```
+
+
+```r
+cor_pos %>%
+  ggplot(aes(x = order, y = correlation, fill = item1)) +
+  geom_col(show.legend = FALSE) +
+  scale_x_continuous(
+    breaks = cor_pos$order,
+    labels = cor_pos$item2,
+    expand = c(0, 0)
+  ) +
+  scale_fill_manual(values = c("steelblue", "indianred")) +
+  coord_flip() +
+  labs(x = "words") +
+  my_theme()
+```
+
+<img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-19-1.png" width="2400" />
+
+The analysis confirm that Nøie has a very high custumer satisfication.
+The customer are describing the producted to delivered what they want
+and the service is very satisfiying.
