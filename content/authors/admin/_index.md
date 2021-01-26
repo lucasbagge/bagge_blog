@@ -1,12 +1,12 @@
 ---
 authors:
 - admin
-bio: I'm an author, international minded, and real-world practitioner focusing on data analysis and machine learning practice. I love making beautiful charts and communicating about technical topics with diverse audiences.
+bio: I'm an author, international keynote speaker, and real-world practitioner focusing on data analysis and machine learning practice. I love making beautiful charts and communicating about technical topics with diverse audiences.
 email: ""
 organizations:
-- name: Blackwoodseven
-  url: "https://blackwoodseven.com/"
-role: Data Scientist & Data Manager 
+- name: RStudio PBC
+  url: "https://rstudio.com/"
+role: Data Scientist & Software Engineer
 social:
 - icon: twitter
   icon_pack: fab
