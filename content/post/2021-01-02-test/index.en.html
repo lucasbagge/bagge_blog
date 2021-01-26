@@ -17,9 +17,9 @@ image:
 projects: []
 ---
 
-<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
-<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
-<link href="/rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+<script src="{{< blogdown/postref >}}index.en_files/kePrint/kePrint.js"></script>
+<link href="{{< blogdown/postref >}}index.en_files/lightable/lightable.css" rel="stylesheet" />
 
 
 <div id="introduction" class="section level2">
@@ -155,7 +155,7 @@ out <em>why</em>.</p>
   ) +
   my_theme() +
   xlim(-40, 40)</code></pre>
-<p><img src="/post/2021-01-02-test/index.en_files/figure-html/unnamed-chunk-5-1.png" width="2400" /></p>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-5-1.png" width="2400" /></p>
 <p>In a crude way we can put positive and negative reviews in separate data
 frames perform topic modelling on each in order to explore what
 reviewers lik and dislike.</p>
@@ -215,7 +215,7 @@ Positive reviews
 1
 </td>
 <td style="text-align:right;">
-52
+76
 </td>
 </tr>
 <tr>
@@ -223,7 +223,7 @@ Positive reviews
 2
 </td>
 <td style="text-align:right;">
-57
+34
 </td>
 </tr>
 </tbody>
@@ -291,7 +291,7 @@ Negative reviews
 2
 </td>
 <td style="text-align:right;">
-4
+2
 </td>
 </tr>
 </tbody>
@@ -338,7 +338,7 @@ plot_neg &lt;- topTerms_neg %&gt;%
   theme(axis.title = element_blank())
 
 grid.arrange(plot_pos, plot_neg, ncol = 1)</code></pre>
-<p><img src="/post/2021-01-02-test/index.en_files/figure-html/unnamed-chunk-15-1.png" width="2400" /></p>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-15-1.png" width="2400" /></p>
 <p>So with the above plots we get a feeling on what the reviewer like and dislike
 regarding Nøie product and brand.</p>
 <p>As a general notice we are dealing with a really small dataset so this give
@@ -405,7 +405,7 @@ pairs_plot_neg &lt;-
   )
 
 grid.arrange(pairs_plot_pos, pairs_plot_neg, ncol = 2)</code></pre>
-<p><img src="/post/2021-01-02-test/index.en_files/figure-html/unnamed-chunk-17-1.png" width="2400" /></p>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-17-1.png" width="2400" /></p>
 <p>In the positive reviews, it is clear that the word for “creme” tends to co-occur
 with the word for “hud” and “god”. In the negative reviews, we can se there is
 not enough data for making any clearness regarding the co-occurance of words.</p>
@@ -442,7 +442,7 @@ which words most frequently are used.</p>
   coord_flip() +
   labs(x = &quot;words&quot;) +
   my_theme()</code></pre>
-<p><img src="/post/2021-01-02-test/index.en_files/figure-html/unnamed-chunk-19-1.png" width="2400" /></p>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-19-1.png" width="2400" /></p>
 <p>The analysis confirm that Nøie has a very high custumer satisfication.
 The customer are describing the producted to delivered what they want
 and the service is very satisfiying.</p>
