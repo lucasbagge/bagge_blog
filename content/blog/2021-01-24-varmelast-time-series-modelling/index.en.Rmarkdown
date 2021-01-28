@@ -1,12 +1,16 @@
 ---
-title: Varmelast
+title: 'Varmelast'
 author: Lucas Bagge
 date: '2021-01-24'
 slug: varmelast
-categories: [Time Series]
-tags: [Xgboost, machine learning, prophet]
-subtitle: 'Here I am gonna extract time series data from a site and make different models'
-summary: 'If you want to use tidyverse to make time series models the ´timetk´ is a great tool for that'
+categories: 
+- Time Series
+tags: 
+- Xgboost
+- machine learning
+- prophet
+subtitle: 
+summary: 'Learn how to use ´timetk´ to build time series models.'
 authors: [Lucas Bagge]
 lastmod: '2021-01-24T22:50:11+01:00'
 featured: no

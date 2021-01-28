@@ -1,12 +1,16 @@
 ---
-title: Varmelast
+title: 'Varmelast'
 author: Lucas Bagge
 date: '2021-01-24'
 slug: varmelast
-categories: [Time Series]
-tags: [Xgboost, machine learning, prophet]
-subtitle: 'Here I am gonna extract time series data from a site and make different models'
-summary: 'If you want to use tidyverse to make time series models the ´timetk´ is a great tool for that'
+categories: 
+- Time Series
+tags: 
+- Xgboost
+- machine learning
+- prophet
+subtitle: 
+summary: 'Learn how to use ´timetk´ to build time series models.'
 authors: [Lucas Bagge]
 lastmod: '2021-01-24T22:50:11+01:00'
 featured: no
@@ -126,7 +130,7 @@ data %>%
 ```
 
 ```
-## Rows: 2,415
+## Rows: 2,487
 ## Columns: 17
 ## $ be_eo_ctr_eff         <dbl> 759.52, 745.04, 733.10, 730.36, 749.44, 793.04,…
 ## $ Affaldsenergianlæg    <dbl> 318.29, 323.38, 310.82, 313.69, 315.18, 307.19,…
@@ -168,7 +172,7 @@ data %>%
 <tbody>
   <tr>
    <td style="text-align:left;"> 2020-10-15 22:00:00 </td>
-   <td style="text-align:left;"> 2021-01-24 13:00:00 </td>
+   <td style="text-align:left;"> 2021-01-27 13:00:00 </td>
   </tr>
 </tbody>
 </table>
@@ -398,7 +402,7 @@ recipe_spec %>% prep() %>% juice()
 ```
 
 ```
-## # A tibble: 2,295 x 41
+## # A tibble: 2,367 x 41
 ##    date                value date_index.num date_year date_year.iso date_half
 ##    <dttm>              <dbl>          <dbl>     <int>         <int>     <int>
 ##  1 2020-10-15 22:00:00  799.     1602799200      2020          2020         2
@@ -411,7 +415,7 @@ recipe_spec %>% prep() %>% juice()
 ##  8 2020-10-16 05:00:00  723.     1602824400      2020          2020         2
 ##  9 2020-10-16 06:00:00  723.     1602828000      2020          2020         2
 ## 10 2020-10-16 07:00:00  728.     1602831600      2020          2020         2
-## # … with 2,285 more rows, and 35 more variables: date_quarter <int>,
+## # … with 2,357 more rows, and 35 more variables: date_quarter <int>,
 ## #   date_month <int>, date_day <int>, date_wday <int>, date_mday <int>,
 ## #   date_qday <int>, date_yday <int>, date_mweek <int>, date_week <int>,
 ## #   date_week.iso <int>, date_week2 <int>, date_week3 <int>, date_week4 <int>,
@@ -586,47 +590,47 @@ calibration_table %>%
 <tbody>
   <tr>
    <td style="text-align:right;"> 1 </td>
-   <td style="text-align:left;"> ARIMA(1,1,2)(0,0,1)[24] </td>
+   <td style="text-align:left;"> ARIMA(2,1,3)(0,0,2)[24] WITH DRIFT </td>
    <td style="text-align:left;"> Test </td>
-   <td style="text-align:right;"> 113.1345 </td>
-   <td style="text-align:right;"> 9.717914 </td>
-   <td style="text-align:right;"> 2.298084 </td>
-   <td style="text-align:right;"> 8.825899 </td>
-   <td style="text-align:right;"> 162.0439 </td>
-   <td style="text-align:right;"> 0.0046717 </td>
+   <td style="text-align:right;"> 112.68407 </td>
+   <td style="text-align:right;"> 7.398378 </td>
+   <td style="text-align:right;"> 3.192943 </td>
+   <td style="text-align:right;"> 7.723044 </td>
+   <td style="text-align:right;"> 136.8573 </td>
+   <td style="text-align:right;"> 0.3597701 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> 2 </td>
    <td style="text-align:left;"> PROPHET </td>
    <td style="text-align:left;"> Test </td>
-   <td style="text-align:right;"> 161.9057 </td>
-   <td style="text-align:right;"> 13.745349 </td>
-   <td style="text-align:right;"> 3.288766 </td>
-   <td style="text-align:right;"> 12.202351 </td>
-   <td style="text-align:right;"> 206.9557 </td>
-   <td style="text-align:right;"> 0.0924678 </td>
+   <td style="text-align:right;"> 150.48829 </td>
+   <td style="text-align:right;"> 9.831824 </td>
+   <td style="text-align:right;"> 4.264139 </td>
+   <td style="text-align:right;"> 10.508634 </td>
+   <td style="text-align:right;"> 182.1158 </td>
+   <td style="text-align:right;"> 0.0084359 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:left;"> GLMNET </td>
    <td style="text-align:left;"> Test </td>
-   <td style="text-align:right;"> 209.8264 </td>
-   <td style="text-align:right;"> 17.646073 </td>
-   <td style="text-align:right;"> 4.262172 </td>
-   <td style="text-align:right;"> 15.367490 </td>
-   <td style="text-align:right;"> 256.3096 </td>
-   <td style="text-align:right;"> 0.0365407 </td>
+   <td style="text-align:right;"> 98.70765 </td>
+   <td style="text-align:right;"> 7.013157 </td>
+   <td style="text-align:right;"> 2.796916 </td>
+   <td style="text-align:right;"> 6.781238 </td>
+   <td style="text-align:right;"> 117.4634 </td>
+   <td style="text-align:right;"> 0.1185149 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> 4 </td>
    <td style="text-align:left;"> PROPHET W/ XGBOOST ERRORS </td>
    <td style="text-align:left;"> Test </td>
-   <td style="text-align:right;"> 167.0436 </td>
-   <td style="text-align:right;"> 13.931666 </td>
-   <td style="text-align:right;"> 3.393131 </td>
-   <td style="text-align:right;"> 12.690698 </td>
-   <td style="text-align:right;"> 208.4420 </td>
-   <td style="text-align:right;"> 0.0633743 </td>
+   <td style="text-align:right;"> 201.05605 </td>
+   <td style="text-align:right;"> 13.130585 </td>
+   <td style="text-align:right;"> 5.696995 </td>
+   <td style="text-align:right;"> 14.423034 </td>
+   <td style="text-align:right;"> 241.7367 </td>
+   <td style="text-align:right;"> 0.1632732 </td>
   </tr>
 </tbody>
 </table>
