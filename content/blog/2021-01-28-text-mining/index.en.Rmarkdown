@@ -1,0 +1,384 @@
+---
+title: Text mining
+author: R package build
+date: '2021-01-28'
+slug: text-mining
+categories: []
+tags: []
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-01-28T22:36:54+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
+                      tidy = "styler", fig.width = 8, fig.height = 5)
+library(scales)
+library(tidyverse)
+library(rsample)
+library(tidymodels)
+library(textrecipes)
+library(ggplot2)
+theme_set(theme_minimal())
+```
+
+
+```{r}
+moviereview <- read_csv("movie_review.csv") %>% 
+  mutate(tag = as.factor(ifelse(tag == 'pos', 1, 0)))
+moviereview %>% head()
+```
+
+```{r}
+moviereview %>%
+  ggplot(aes(nchar(text))) +
+  geom_histogram(binwidth = 1, alpha = 0.8) +
+  labs(
+    x = "Number of characters per campaign blurb",
+    y = "Number of campaign blurbs"
+  )
+```
+
+```{r}
+moviereview_split <- moviereview %>% initial_split(strata = tag)
+
+train <- training(moviereview_split)  
+test <- testing(moviereview_split)
+```
+
+## machine learing
+
+
+```{r}
+complaints_rec <- recipe(tag ~ text, data = train) %>%
+  step_tokenize(text) %>%
+  textrecipes::step_stopwords(text) %>%
+  step_tokenfilter(text) %>%
+  step_tfidf(text)
+```
+
+```{r}
+complaint_prep <- prep(complaints_rec)
+```
+
+```{r}
+complaint_wf <- workflow() %>%
+  add_recipe(complaints_rec)
+```
+
+
+```{r}
+library(discrim)
+nb_spec <- naive_Bayes() %>%
+  set_mode("classification") %>%
+  set_engine("naivebayes")
+
+nb_spec
+```
+
+```{r}
+nb_fit <- complaint_wf %>%
+  add_model(nb_spec) %>%
+  fit(data = train)
+```
+
+```{r}
+set.seed(234)
+complaints_folds <- vfold_cv(train)
+
+complaints_folds
+```
+
+```{r}
+nb_wf <- workflow() %>%
+  add_recipe(complaints_rec) %>%
+  add_model(nb_spec)
+
+nb_wf
+```
+
+```{r}
+nb_rs <- fit_resamples(
+  nb_wf,
+  complaints_folds,
+  control = control_resamples(save_pred = TRUE)
+)
+```
+
+```{r}
+nb_rs_metrics <- collect_metrics(nb_rs)
+nb_rs_predictions <- collect_predictions(nb_rs)
+```
+
+```{r}
+nb_rs_metrics
+```
+
+```{r}
+nb_rs_predictions %>%
+  group_by(id) %>%
+  roc_curve(truth = tag, .pred_0) %>%
+  autoplot() +
+  labs(
+    color = NULL,
+    title = "Receiver operator curve for US Consumer Finance Complaints",
+    subtitle = "Each resample fold is shown in a different color"
+  )
+```
+
+```{r}
+nb_rs_predictions %>%
+  filter(id == "Fold01") %>%
+  conf_mat(tag, .pred_class) %>%
+  autoplot(type = "heatmap")
+```
+
+
+## deep learning
+
+```{r}
+train %>%
+  mutate(n_words = tokenizers::count_words(text)) %>%
+  ggplot(aes(n_words)) +
+  geom_bar() +
+  labs(
+    x = "Number of words per campaign blurb",
+    y = "Number of campaign blurbs"
+  )
+```
+
+```{r}
+library(textrecipes)
+
+max_words <- 2000
+max_length <- 50
+
+movie_rec <- recipe(~ text, data = train) %>%
+  step_tokenize(text) %>%
+  step_tokenfilter(text, max_tokens = max_words) %>%
+  step_sequence_onehot(text, sequence_length = max_length)
+
+movie_rec
+```
+
+```{r}
+movie_rec %>% prep()
+```
+
+```{r}
+movie_rec %>% prep() %>% tidy(3)
+```
+
+```{r}
+movie_rec %>% prep() %>% bake(new_data = NULL, composition = 'matrix')
+```
+
+```{r}
+movie_prep <- prep(movie_rec)
+mov_train <- bake(movie_prep, new_data = NULL, composition = "matrix")
+dim(mov_train)
+```
+
+```{r}
+library(keras)
+
+dense_model <- keras_model_sequential() %>% 
+  layer_embedding(
+    input_dim = max_words + 1,
+    output_dim = 12,
+    input_length = max_length
+  ) %>% 
+  layer_flatten() %>% 
+   layer_dense(units = 32, activation = "relu") %>%
+  layer_dense(units = 1, activation = "sigmoid")
+dense_model
+```
+
+```{r}
+dense_model %>% compile(
+  optimizer = "adam",
+  loss = "binary_crossentropy",
+  metrics = c("accuracy")
+)
+```
+
+```{r}
+dense_history <- dense_model %>%
+  fit(
+    x = mov_train,
+    y = train$tag,
+    batch_size = 512,
+    epochs = 20,
+    validation_split = 0.25,
+    verbose = FALSE
+  )
+```
+
+
+```{r}
+plot(dense_history)
+```
+
+```{r}
+set.seed(234)
+mov_val <- validation_split(train, strata = tag)
+mov_val
+```
+
+```{r}
+mov_analysis <- bake(movie_prep,
+  new_data = analysis(mov_val$splits[[1]]),
+  composition = "matrix"
+)
+dim(mov_analysis)
+```
+
+```{r}
+mov_assess <- bake(movie_prep,
+  new_data = assessment(mov_val$splits[[1]]),
+  composition = "matrix"
+)
+dim(mov_assess)
+```
+
+```{r}
+state_analysis <- analysis(mov_val$splits[[1]]) %>% pull(tag)
+state_assess <- assessment(mov_val$splits[[1]]) %>% pull(tag)
+```
+
+```{r}
+dense_model <- keras_model_sequential() %>%
+  layer_embedding(
+    input_dim = max_words + 1,
+    output_dim = 12,
+    input_length = max_length
+  ) %>%
+  layer_flatten() %>%
+  layer_dense(units = 32, activation = "relu") %>%
+  layer_dense(units = 1, activation = "sigmoid")
+
+dense_model %>% compile(
+  optimizer = "adam",
+  loss = "binary_crossentropy",
+  metrics = c("accuracy")
+)
+```
+
+```{r}
+val_history <- dense_model %>%
+  fit(
+    x = mov_analysis,
+    y = state_analysis,
+    batch_size = 512,
+    epochs = 10,
+    validation_data = list(mov_assess, state_assess),
+    verbose = FALSE
+  )
+
+val_history
+```
+
+```{r}
+plot(val_history)
+```
+
+
+```{r}
+library(dplyr)
+
+keras_predict <- function(model, baked_data, response) {
+  predictions <- predict(model, baked_data)[, 1]
+
+  tibble(
+    .pred_1 = predictions,
+    .pred_class = if_else(.pred_1 < 0.5, 0, 1),
+    state = response
+  ) %>%
+    mutate(across(
+      c(state, .pred_class), ## create factors
+      ~ factor(.x, levels = c(1, 0))
+    )) ## with matching levels
+}
+```
+
+```{r}
+val_res <- keras_predict(dense_model, mov_assess, state_assess)
+val_res
+```
+
+```{r}
+metrics(val_res, state, .pred_class)
+```
+
+```{r}
+val_res %>%
+  conf_mat(state, .pred_class) %>%
+  autoplot(type = "heatmap")
+```
+
+```{r}
+val_res %>%
+  roc_curve(truth = state, .pred_1) %>%
+  autoplot() +
+  labs(
+    title = "Receiver operator curve for Kickstarter blurbs"
+  )
+```
+
+```{r}
+library(textdata)
+
+glove6b <- embedding_glove6b(dimensions = 50) %>% select(1:13)
+```
+
+```{r}
+kick_prep <- prep(movie_rec)
+kick_matrix <- bake(kick_prep, new_data = NULL, composition = "matrix")
+
+dim(kick_matrix)
+```
+
+
+```{r}
+lstm_mod <- keras_model_sequential() %>%
+  layer_embedding(input_dim = max_words + 1, output_dim = 52) %>%
+  layer_lstm(units = 52) %>%
+  layer_dense(units = 1, activation = "sigmoid")
+
+lstm_mod
+```
+```{r}
+lstm_mod %>%
+  compile(
+    optimizer = "adam",
+    loss = "binary_crossentropy",
+    metrics = c("accuracy")
+  )
+```
+
+```{r}
+lstm_history <- lstm_mod %>%
+  fit(
+    kick_matrix,
+    train$tag,
+    epochs = 10,
+    validation_split = 0.25,
+    batch_size = 512,
+    verbose = FALSE
+  )
+```
+
+```{r}
+plot(lstm_history)
+
+```
+

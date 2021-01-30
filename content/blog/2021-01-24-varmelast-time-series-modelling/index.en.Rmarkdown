@@ -1,17 +1,16 @@
 ---
-title: 'Varmelast'
-author: Lucas Bagge
+title: "Varmelast"
+author: "Lucas Bagge"
 date: '2021-01-24'
 slug: varmelast
-categories: 
-- Time Series
-tags: 
+categories: Time Series
+tags:
 - Xgboost
 - machine learning
 - prophet
-subtitle: 
-summary: 'Learn how to use ´timetk´ to build time series models.'
-authors: [Lucas Bagge]
+subtitle: null
+summary: Learn how to use ´timetk´ to build time series models.
+authors: Lucas Bagge
 lastmod: '2021-01-24T22:50:11+01:00'
 featured: no
 image:
