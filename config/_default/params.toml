@@ -105,7 +105,7 @@ contact_links = [
 sharing_image = "sharon-mccutcheon-62vi3TG5EDg-unsplash_small.jpg"
 
 # Twitter username (without @). Used when a visitor shares your site on Twitter.
-twitter = "juliasilge"
+twitter = "lucasbagge"
 
 ############################
 ## Regional Settings
@@ -131,7 +131,7 @@ main_menu = {align = "r", show_logo = true}
 reading_time = true
 
 # Display next/previous section pager? (true/false)
-section_pager = false
+section_pager = true
 docs_section_pager = true  # Display pager in Docs layout (e.g. tutorials)?
 
 # Enable in-built social sharing buttons? (true/false)
