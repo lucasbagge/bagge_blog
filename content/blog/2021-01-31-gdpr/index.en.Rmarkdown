@@ -1,14 +1,17 @@
 ---
-title: GDPR
+title: GDPR analysis and introduction to tidymodels.
 author: Lucas Bagge
-date: '2021-01-31'
-slug: gdpr
-categories: []
-tags: []
+date: '2020-05-04'
+slug: GPR and tidymodels
+categories:
+  - GDPR
+  - tidymodels
+tags:
+  - tidymodels
 subtitle: ''
 summary: ''
 authors: []
-lastmod: '2021-01-31T00:18:25+01:00'
+lastmod: '2020-05-04T22:31:29+02:00'
 featured: no
 image:
   caption: ''
