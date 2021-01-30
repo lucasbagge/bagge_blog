@@ -1,0 +1,337 @@
+---
+title: GDPR
+author: Lucas Bagge
+date: '2021-01-31'
+slug: gdpr
+categories: []
+tags: []
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-01-31T00:18:25+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(
+  cache = FALSE, warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
+                      tidy = "styler", fig.width = 8, fig.height = 5)
+library(scales)
+library(tidyverse)
+```
+
+# Introduction
+
+For this first post I will show an example of using newly launched [tidymodels](https://www.tidymodels.org/), 
+which is a new packages that make it easiler to make models. To test the packages functionality
+I will work on an dataset for GDPR violation and see which gives the biggest fines.
+
+## Explore the date
+
+Our modelling goal here is to understand which GDOR violations gives the higest fines. Before I
+will look at the data it is reasonable to understand some of the GDPR articles and
+what they are about:
+
+- **Article 5:** principles for processing personal data (legitimate purpose, limited)
+- **Article 6:** lawful processing of personal data (i.e. consent, etc)
+- **Article 13:** inform subject when personal data is collected
+- **Article 15:** right of access by data subject
+- **Article 32:** security of processing (i.e. data breaches)
+
+
+As a first step in analysis gdpr violations and get a understanding of tidymodels
+I will explore the data.
+
+```{r, include=FALSE}
+library(tidyverse)
+gdpr_raw <- readr::read_tsv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-04-21/gdpr_violations.tsv")
+```
+
+
+```{r}
+gdpr_raw 
+```
+
+
+How are they distributed?
+
+```{r}
+gdpr_raw %>% 
+  ggplot(aes(
+    price + 1
+  )) +
+  geom_histogram() +
+  scale_x_log10(labels = scales::dollar_format(prefix = "€")) +
+  labs(x = "GDPR fine (EUR)",
+       y = "GDPR violations") +
+  theme_minimal()
+```
+
+We will know make the data tidy:
+
+```{r}
+gdp_tidy <- gdpr_raw %>% 
+  # add nes variable and drops existing ones.
+  transmute(id,
+            price,
+            country = name,
+            article_violated,
+            articles = str_extract_all(article_violated,
+                                       # Add regex to get numbers
+                                       # Have a look to see that some didt get becasue of missing space
+                                       "Art. [:digit:]+|Art.[:digit:]+")) %>% 
+  # more engerring
+  # more violations gives bigger fines
+  # Beacuse we know it is an integer we can say map_int
+  mutate(total_articles = map_int(articles, length)) %>% 
+  # by unnest we are gonna spread the articles.
+  unnest(articles) %>% 
+# We can count the number of articles.
+# There is 27 articles and is to many for our modelling
+# this wee need to faut
+  #count(articles, sort = TRUE)
+  add_count(articles) %>% 
+  filter(n > 10) %>% 
+  select(-n)
+# Kow we have a row for each violations and not 
+gdp_tidy
+```
+
+How are the articles distributed over per article? 
+
+```{r}
+library(ggbeeswarm)
+gdp_tidy %>% 
+  mutate(articles = str_replace_all(articles, "Art. ", "Article "),
+         articles = fct_reorder(articles, price)) %>%
+  ggplot(aes(
+    articles, price + 1, color = articles, fill = articles
+  )) +
+  geom_quasirandom() +
+  geom_boxplot(alpha = 0.2, outlier.colour = NA) +
+  scale_y_log10(labels = scales::dollar_format(prefix = "£")) +
+  labs(
+    x = NULL, y = "GDPR fine (EUR)",
+    title = "GDPR fines levied by article",
+    subtitle = "For 250 violations in 25 countries"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")  
+```
+
+From the beeshart I can see that ther is a bug difference in the size of the fine and
+the different articles. Article 15 is accosiated with the smallest fine and for
+articles 5 and 6 you get a highere fine.
+
+Know I will prefer the data for the modelling.
+
+```{r}
+# Back to one row to on violation.
+gdpr_violation <- gdp_tidy %>% 
+  mutate(value = 1) %>% 
+  select(-article_violated) %>% 
+# article and value is gonna be maded wider
+  pivot_wider(names_from = articles, values_from = value,
+              values_fn = list(value = max),
+              values_fill = list(value = 0)) %>% 
+  janitor::clean_names() 
+gdpr_violation
+```
+
+With this data we are ready to take the next step and start building our model.
+
+## Build model
+
+One key step before building the model is the prepocess the data.
+
+```{r}
+library(tidymodels)
+# Data preprocessing
+gdpr_rec <- recipe(price ~ ., data = gdpr_violation) %>% 
+  update_role(id, new_role = "id") %>% 
+  step_log(price, base = 10, offset = 1, skip = TRUE) %>%  #skip: i tilfælde vi ikke har et outcome varibale
+  # There is to many country
+  step_other(country, other = "Other") %>% 
+  step_dummy(all_nominal()) %>% 
+  # fjerner ting som ingen varians har. 
+  step_zv(all_predictors())
+# We set a recipe to model our data. 
+gdpr_prep <- prep(gdpr_rec)
+# For train the model use prep
+gdpr_prep
+```
+
+The modelling process in tidymodels is build on a recipe like when you are baking.
+It makes sence because you can see both process as a algoritme, which is just some
+steps you are doing to complete your task.
+
+- The first thing we need to specify is what are our model going to be and what
+data is it going to use.
+- For the next part we need to identify what we consider predictor or outcome. Here it
+is important that we tell the recipe that `id` is not either but we want to keep it.
+- The next step is to take the log of `price`, which is the amount of the fine.
+- We only want to look at the important `country`, so the other we collapses with `Other`. 
+- At last we create an indicator variable and remove variable with zero variance.
+
+Until know we haven´t don anything but only defined a lot of stuff. With `prep`
+we evaluted our data.
+
+Here we introduced the `workflow()` which can be associates with lego blocks. Here
+we can have both the recipe and model (our model is a OLS model). 
+
+```{r}
+# How does our data look like know?
+juice(gdpr_prep)
+```
+
+```{r}
+# workflow, contain object that let you carrie stuff around.
+gdpr_workflow <- workflow() %>% 
+  add_recipe(gdpr_rec) %>% 
+  add_model(linear_reg() %>% 
+              set_engine("lm"))
+# I want a model wark flow and get a linear model. 
+# prepoccesor + model
+# 
+gdpr_workflow
+```
+
+When we normally have a model we want to fit it. This is an important aspect in
+modelling because this tell us have well our model is. 
+
+```{r}
+gdpr_fit <- gdpr_workflow %>%
+  fit(data = gdpr_violation)
+(gdpr_fit)
+```
+
+So we can fit a model or a workflow.
+
+## Explore results
+
+Let us see if we can get anything out of weather country and fines are different.
+
+```{r}
+gdpr_fit %>% 
+  pull_workflow_fit() %>% 
+  tidy() %>% 
+  arrange(estimate) %>% 
+  kable()
+```
+
+The results makes perfectly sense and we see that if you have many GDPR violation
+then the fine is bigger.
+
+```{r}
+gdpr_fit %>% 
+  pull_workflow_fit() %>% 
+  tidy() %>% 
+  filter(p.value < 0.05) %>% 
+  arrange(estimate) %>% 
+  kable()
+```
+
+If you violates art_15 which is if you dont give the right of access by data subject,
+then you get a lower fine.  
+
+What if we relax it a litlle bit?
+
+```{r}
+gdpr_fit %>% 
+  pull_workflow_fit() %>% 
+  tidy() %>% 
+  filter(p.value < 0.1) %>% 
+  kable()
+```
+
+Here we see that violation of article 13, 6 and 15 gives you are smaller fine.
+
+We know want to explore the result even more and try to predict. Here tidymodels is
+really good.
+
+
+As we have seen from the resulta we have big p-values. But I understand the results
+better if I see them visual. I will make prediction with the help of `workflow()`
+
+Let´s create some example new data that we are interested in.
+
+```{r}
+new_data <- crossing(
+  country = "Other",
+  art_5 =  0:1,
+  art_6 = 0:1,
+  art_13 = 0:1,
+  art_15 = 0:1,
+  art_32 = 0:1) %>% 
+  mutate(
+    total_articles = art_5 +
+      art_6 +
+      art_13 +
+      art_15 +
+      art_32,
+    id = row_number(
+    ))
+new_data %>% 
+  head() %>% 
+  kable()
+```
+
+
+The above code are making some new data. With the new data we can make prediction
+analysis. In the next step I will calculate the mean and confidence interval.
+
+```{r}
+mean_pred <- predict(gdpr_fit,
+                     new_data = new_data)
+conf_int_pred <- predict(gdpr_fit,
+                         new_data = new_data,
+                         type = "conf_int")
+gdpr_res <- new_data %>% 
+  bind_cols(mean_pred) %>% 
+  bind_cols(conf_int_pred)
+gdpr_res
+```
+
+Know we have the prediction in log euros. We also see we can get the confidence
+interval. 
+
+From the res we have that for different amount violation what can we predict
+what they have violated. 
+
+```{r}
+gdpr_res %>%
+  filter(total_articles == 1) %>%
+  pivot_longer(art_5:art_32) %>%
+  filter(value > 0) %>%
+  mutate(
+    name = str_replace_all(name, "art_", "Article "),
+    name = fct_reorder(name, .pred)
+  ) %>%
+  ggplot(aes(name, 10^.pred, color = name)) +
+  geom_point(size = 3.5) +
+  geom_errorbar(aes(
+    ymin = 10^.pred_lower,
+    ymax = 10^.pred_upper
+  ),
+  width = 0.2, alpha = 0.7
+  ) +
+  theme_minimal() + 
+  labs(
+    x = NULL, y = "Increase in fine (EUR)",
+    title = "Predicted fine for each type of GDPR article violation",
+    subtitle = "Modeling based on 250 violations in 25 countries"
+  ) +
+  scale_y_log10(labels = scales::dollar_format(prefix = "€", accuracy = 1)) +
+  theme(legend.position = "none")
+```
+
+Know we have a model over the how expensive each fine are and which will give 
+you the highest.
