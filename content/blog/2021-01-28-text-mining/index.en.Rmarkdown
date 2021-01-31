@@ -31,6 +31,27 @@ library(ggplot2)
 theme_set(theme_minimal())
 ```
 
+## Introduction
+
+In this new series of post I will explain and make  Deel learning models to 
+predict outcomes from predictors in text data. Thease models are different then
+orther supervised learnings algoritmes such as *regularized lenear models*,
+*support vector machines* and *naive bayes* because they are deep meaning they
+use multiple layers to learn how to map from input features to output outcomes. 
+Where the former use a shallow (single) mapping.
+
+In this first post on Deep learning we wil explore a **densely connected neural 
+network**. This type of model is not the one that is gonna review the best
+performance on text data, but it is a great *null* model to start learning
+about deep learning models. I will go though the different components in 
+a deep learning model and what software to use.
+
+The deep learning models is gonna be compared to a Naive Bayes model and look
+which of those two get the best result.
+
+For the analysis I am gonna use the data on 
+[kaggle](https://www.kaggle.com/nltkdata/movie-review?select=movie_review.csv)
+that is part of a competition I am participanted in.
 
 ```{r}
 moviereview <- read_csv("movie_review.csv") %>% 
