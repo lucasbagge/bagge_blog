@@ -51,7 +51,11 @@ which of those two get the best result.
 
 For the analysis I am gonna use the data on 
 [kaggle](https://www.kaggle.com/nltkdata/movie-review?select=movie_review.csv)
-that is part of a competition I am participanted in.
+that is part of a competition I am participated in.
+
+## Neural network
+
+
 
 ```{r}
 moviereview <- read_csv("movie_review.csv") %>% 
@@ -165,6 +169,16 @@ nb_rs_predictions %>%
 
 
 ## deep learning
+
+```{r}
+moviereview_split <- moviereview %>%
+  mutate(tag = as.numeric(tag)) %>% 
+  initial_split(strata = tag)
+
+train <- training(moviereview_split)  
+test <- testing(moviereview_split)
+```
+
 
 ```{r}
 train %>%
@@ -344,62 +358,5 @@ metrics(val_res, state, .pred_class)
 val_res %>%
   conf_mat(state, .pred_class) %>%
   autoplot(type = "heatmap")
-```
-
-```{r}
-val_res %>%
-  roc_curve(truth = state, .pred_1) %>%
-  autoplot() +
-  labs(
-    title = "Receiver operator curve for Kickstarter blurbs"
-  )
-```
-
-```{r}
-library(textdata)
-
-glove6b <- embedding_glove6b(dimensions = 50) %>% select(1:13)
-```
-
-```{r}
-kick_prep <- prep(movie_rec)
-kick_matrix <- bake(kick_prep, new_data = NULL, composition = "matrix")
-
-dim(kick_matrix)
-```
-
-
-```{r}
-lstm_mod <- keras_model_sequential() %>%
-  layer_embedding(input_dim = max_words + 1, output_dim = 52) %>%
-  layer_lstm(units = 52) %>%
-  layer_dense(units = 1, activation = "sigmoid")
-
-lstm_mod
-```
-```{r}
-lstm_mod %>%
-  compile(
-    optimizer = "adam",
-    loss = "binary_crossentropy",
-    metrics = c("accuracy")
-  )
-```
-
-```{r}
-lstm_history <- lstm_mod %>%
-  fit(
-    kick_matrix,
-    train$tag,
-    epochs = 10,
-    validation_split = 0.25,
-    batch_size = 512,
-    verbose = FALSE
-  )
-```
-
-```{r}
-plot(lstm_history)
-
 ```
 

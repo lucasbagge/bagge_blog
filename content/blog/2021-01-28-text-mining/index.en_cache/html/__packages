@@ -23,3 +23,8 @@ workflows
 yardstick
 textrecipes
 keras
+discrim
+rlang
+vctrs
+naivebayes
+stopwords
