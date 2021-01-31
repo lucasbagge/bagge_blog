@@ -19,7 +19,7 @@ projects: []
 
 ```{r setup, include=FALSE}
 library(knitr)
-knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
+knitr::opts_chunk$set(cache = FALSE, warning = FALSE, message = FALSE, 
                       echo = TRUE, dpi = 300, cache.lazy = FALSE,
                       tidy = "styler", fig.width = 8, fig.height = 5)
 library(scales)
@@ -55,60 +55,173 @@ that is part of a competition I am participated in.
 
 ## Neural network
 
+A neural network idea is based on the human brain where we the brain receive
+an input from a sensor and goes though different layers before being
+executed og end up in the brain. 
 
+The input which is the data can be stored in different dimensions. They 
+are called **tensors** and is a key concept and that is way Google´s `TensorFlow`
+was named efter them.
+
+So a tensor is basically data that can be in different dimensions and it is
+defined by three key attributes:
+
+- Number of axes (rank) - where axes is a *dimension*.
+- Shape - This is an integer vector that describes how many dimensions the tensor
+  has. In R you can see the dimensions with `dim()`.
+- Data types - this is the type of dta contained in the tensor and should be
+  a `integer` or `double`.
+  
+The math and calculations behind tensors relies a lot on **Linear Algebra** which
+I will make another post for explaining.
+
+The last step in this short introduction int the method in getting the right 
+output. Here there is different optimization methods but one that is
+used a lot is **gradient descent**:
+
+![Gradient descent](gd.png)
+
+So the picture explain the essens of what the optimization methods does. You
+start of and goes to the final point but you eyees a blinded so under the
+way to the final point you have to optimize the path.
+
+### Anatomy of a neural network
+
+So in a neural network we have the following objects:
+
+- Layers tha are combined into a model/network.
+- The input data and corresponding target.
+- A loss function which defines the feedback signal used for learning.
+- The optimizer which determines how the learning are proceeded.
+
+There are diffent types of layers and a simple layer is one that is stored in
+2D tensors of shape and they are processed by **densely connected layers**.
+
+### Introduction to Keras
+
+For this post I will use `kera` which is a deep learning framework to train
+your model. It is a very used framework and is he second most used based 
+on the following plot.
+
+![Interest in deep learning framework over time](deepframework.png)
+
+Keras is high level meaning it dosen´t provide fx tensor manipulation operation.
+Here it realies on backend engine and you have the chosse between TensorFlow, 
+Theano and Microsoft Cognitive Toolkit. A pro for using TensorFlow is that 
+Keras is able to run on both CPUs and GPUs.
+
+Know that we now a little about neural network and the packages kera we can
+start modelling on movie reviews. 
+
+## Data
+
+The data is from kaggle which is a popular site for competing in building
+models for institution or firms that has a problem and want it solved with
+a model.
+
+For this paticular task we har given movie reviews and we want to predict from
+the text if it is positiv or negativ. 
+
+Let us get an overview of the data
 
 ```{r}
-moviereview <- read_csv("movie_review.csv") %>% 
-  mutate(tag = as.factor(ifelse(tag == 'pos', 1, 0)))
-moviereview %>% head()
+moviereview <- read_csv("movie_review.csv")
+  
+moviereview %>% skimr::skim()
 ```
+
+From the data it is of course the `tag` (it gives us if the review was positive
+or negative) and th `text` (it gives a comment on the movie). So I need to
+use the two variable to see if I can use the information in the text to predict
+the tag. 
+
+To get a little familiar with the data I will look at the distribution of
+characters.
 
 ```{r}
 moviereview %>%
   ggplot(aes(nchar(text))) +
   geom_histogram(binwidth = 1, alpha = 0.8) +
   labs(
-    x = "Number of characters per campaign blurb",
-    y = "Number of campaign blurbs"
+    x = "Number of characters per text",
+    y = "Number of text"
   )
 ```
 
+The plot shows that the distribution is left-skewed and most reviewer docent
+write that much. 
+
+There is not much to say regarding the data because my focus is on building
+the models and introduced deep learning and how it can be applied in R.
+
+For making the models I will use a Naive Bayes model and a dense deep learning
+model to classify the reviews and see which models performce best. 
+
+
+## A Naive Bayes classification model.
+
+For the first moel we are gonna build a binary model to predict the tag. Let us
+look at the first reviews
+
 ```{r}
-moviereview_split <- moviereview %>% initial_split(strata = tag)
+moviereview %$% text %>% head() 
+```
+
+As many other text data it is messy and it should be corrected. In
+my preprocessinng step I will clean the data up.
+
+For every machine learning project I will create a traning and testing set.
+
+```{r}
+df <- moviereview %>% mutate(tag = as_factor(ifelse(tag == "pos", 1, 0)))
+moviereview_split <- df %>% initial_split(strata = tag)
 
 train <- training(moviereview_split)  
 test <- testing(moviereview_split)
 ```
 
-## machine learing
+For building the Naive Bayes model I am going to rely on `tidymoels` which
+give a greate framework in building a model and apply it to the traning data.
 
+First let us create the recipe which is a preprocessing step where we
+tokenize the text column, remove stopwords, keep the max 150 frequent tokens,
+so we dont get to many variable in the model. 
 
 ```{r}
 complaints_rec <- recipe(tag ~ text, data = train) %>%
   step_tokenize(text) %>%
   textrecipes::step_stopwords(text) %>%
-  step_tokenfilter(text) %>%
+  step_tokenfilter(text, max_tokens = 500) %>%
   step_tfidf(text)
 ```
+
+Now that we have a full specification of the preprocessing recip, we can `prep()`
+this recipe to estimate all the parameter for each step using the traning data.
 
 ```{r}
 complaint_prep <- prep(complaints_rec)
 ```
+
+For most modelling takss you will not need to prep your recipe directly; instead
+you can build up a `workflow()` to bundle together your modeling components.
 
 ```{r}
 complaint_wf <- workflow() %>%
   add_recipe(complaints_rec)
 ```
 
+The Naive Bayes moel is available in the package `discrim` and has a main advantages 
+in its capacity to handle large number of features.
 
 ```{r}
 library(discrim)
 nb_spec <- naive_Bayes() %>%
   set_mode("classification") %>%
   set_engine("naivebayes")
-
-nb_spec
 ```
+
+Now we need to fit the model and for this we just have to add the Bayes model to
+our workflow an then fit it to the traning data. 
 
 ```{r}
 nb_fit <- complaint_wf %>%
@@ -116,20 +229,25 @@ nb_fit <- complaint_wf %>%
   fit(data = train)
 ```
 
+As a additional step before going to test the model on the testing set we
+will resample to evalutate our model. I am going to create 10 fold cross validation
+set for seing the models performance estimates.
+
 ```{r}
 set.seed(234)
 complaints_folds <- vfold_cv(train)
-
-complaints_folds
 ```
+
+Here we have 90% of the traning data in each fold and the other 10% is hel out 
+for evaluation. 
 
 ```{r}
 nb_wf <- workflow() %>%
   add_recipe(complaints_rec) %>%
   add_model(nb_spec)
-
-nb_wf
 ```
+
+Now we gonna fit it on the resampled fold.
 
 ```{r}
 nb_rs <- fit_resamples(
@@ -138,6 +256,9 @@ nb_rs <- fit_resamples(
   control = control_resamples(save_pred = TRUE)
 )
 ```
+
+We can extract the relevant information using `collect_metrices` and 
+`collect_predictions`.
 
 ```{r}
 nb_rs_metrics <- collect_metrics(nb_rs)
@@ -148,6 +269,12 @@ nb_rs_predictions <- collect_predictions(nb_rs)
 nb_rs_metrics
 ```
 
+For these resamples the average accuracy is 52 %.
+
+We can also plot **receiver operator curve** that shows sensitivity at different
+thresholds. It demonstrates how well a classification model can distinguish 
+between classes. 
+
 ```{r}
 nb_rs_predictions %>%
   group_by(id) %>%
@@ -155,40 +282,24 @@ nb_rs_predictions %>%
   autoplot() +
   labs(
     color = NULL,
-    title = "Receiver operator curve for US Consumer Finance Complaints",
+    title = "Receiver operator curve for Reviewer",
     subtitle = "Each resample fold is shown in a different color"
   )
 ```
 
-```{r}
-nb_rs_predictions %>%
-  filter(id == "Fold01") %>%
-  conf_mat(tag, .pred_class) %>%
-  autoplot(type = "heatmap")
-```
+The model is not great at all so let us see if a deep learning model does 
+a better job. 
 
-
-## deep learning
+## Deep learning
 
 ```{r}
+df <- moviereview %>% mutate(tag = ifelse(tag == "pos", 1, 0))
 moviereview_split <- moviereview %>%
   mutate(tag = as.numeric(tag)) %>% 
   initial_split(strata = tag)
 
 train <- training(moviereview_split)  
 test <- testing(moviereview_split)
-```
-
-
-```{r}
-train %>%
-  mutate(n_words = tokenizers::count_words(text)) %>%
-  ggplot(aes(n_words)) +
-  geom_bar() +
-  labs(
-    x = "Number of words per campaign blurb",
-    y = "Number of campaign blurbs"
-  )
 ```
 
 ```{r}
@@ -201,26 +312,12 @@ movie_rec <- recipe(~ text, data = train) %>%
   step_tokenize(text) %>%
   step_tokenfilter(text, max_tokens = max_words) %>%
   step_sequence_onehot(text, sequence_length = max_length)
-
-movie_rec
 ```
 
-```{r}
-movie_rec %>% prep()
-```
-
-```{r}
-movie_rec %>% prep() %>% tidy(3)
-```
-
-```{r}
-movie_rec %>% prep() %>% bake(new_data = NULL, composition = 'matrix')
-```
 
 ```{r}
 movie_prep <- prep(movie_rec)
 mov_train <- bake(movie_prep, new_data = NULL, composition = "matrix")
-dim(mov_train)
 ```
 
 ```{r}
@@ -266,7 +363,6 @@ plot(dense_history)
 ```{r}
 set.seed(234)
 mov_val <- validation_split(train, strata = tag)
-mov_val
 ```
 
 ```{r}
@@ -359,4 +455,3 @@ val_res %>%
   conf_mat(state, .pred_class) %>%
   autoplot(type = "heatmap")
 ```
-
