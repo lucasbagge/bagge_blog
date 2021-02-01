@@ -71,7 +71,7 @@ privacy_pack = false
 
 # Enable visitors to edit pages?
 #   `repo` defines the repository URL. `editable` defines which page types can be edited.
-edit_page = {repo_url = "https://github.com/juliasilge/academic_blog", content_dir = "", repo_branch = "master", editable = {docs = false, page = false, post = false}}
+edit_page = {repo_url = "https://github.com/lucasbagge/academic_blog", content_dir = "", repo_branch = "master", editable = {docs = false, page = false, post = false}}
 
 ############################
 ## Contact details
@@ -131,8 +131,8 @@ main_menu = {align = "r", show_logo = true}
 reading_time = true
 
 # Display next/previous section pager? (true/false)
-section_pager = true
-docs_section_pager = true  # Display pager in Docs layout (e.g. tutorials)?
+section_pager = false
+docs_section_pager = false  # Display pager in Docs layout (e.g. tutorials)?
 
 # Enable in-built social sharing buttons? (true/false)
 sharing = false

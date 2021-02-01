@@ -1,5 +1,5 @@
 ---
-title: "Text mining"
+title: "Introduction to Neural Network - Part 1"
 author: "R package build"
 date: '2021-01-28'
 slug: text-mining
