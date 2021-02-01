@@ -8,8 +8,12 @@ weight = 130  # Order that this section will appear.
 title = "Contact"
 subtitle = ""
 
+[design]
+  # Choose how many columns the section has. Valid values: 1 or 2.
+  columns = "1"
+
 # Automatically link email and phone?
-autolink = true
+autolink = false
 
 # Email form provider
 #   0: Disable email form
