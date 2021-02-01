@@ -106,7 +106,7 @@ subtitle = ""
 
 ### Bachelor Thesis nomination
 
-* My bachelor **The economics effects of QE** was nominalted for the Central bank bachelor prize.
+* My bachelor **The economics effects of QE** was nominated for the Central bank bachelor prize.
 
 ### Master of tidyverse
 
