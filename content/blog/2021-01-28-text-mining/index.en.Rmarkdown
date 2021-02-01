@@ -19,7 +19,7 @@ projects: []
 
 ```{r setup, include=FALSE}
 library(knitr)
-knitr::opts_chunk$set(cache = FALSE, warning = FALSE, message = FALSE, 
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
                       echo = TRUE, dpi = 300, cache.lazy = FALSE,
                       tidy = "styler", fig.width = 8, fig.height = 5)
 library(scales)
@@ -292,9 +292,22 @@ a better job.
 
 ## Deep learning
 
+One of the differnces using a deep learning model is the preprocessing.
+Here we need to choose the length of the text and if the text is
+longer then a certain length it will be truncated. The length is 
+a hyperparameter and one need to make sure they don´t 
+
+- overshoot so the text is given as zero.
+- undershoot so we cut of a lot of text. 
+
+We can count the word in the and select the right value.
+
+
 ```{r}
-df <- moviereview %>% mutate(tag = ifelse(tag == "pos", 1, 0))
-moviereview_split <- moviereview %>%
+df <- moviereview %>%
+  filter(nchar(text) >= 10) %>% 
+  mutate(tag = ifelse(tag == "pos", 1, 0))
+moviereview_split <- df %>%
   mutate(tag = as.numeric(tag)) %>% 
   initial_split(strata = tag)
 
@@ -303,10 +316,23 @@ test <- testing(moviereview_split)
 ```
 
 ```{r}
+train %>%
+  mutate(n_words = tokenizers::count_words(text)) %>%
+  ggplot(aes(n_words)) +
+  geom_bar() +
+  labs(
+    x = "Number of words per reviews",
+    y = "Number of reviews"
+  )
+```
+
+I am goin to try 25 words and include 48540 words in the vocabulary.
+
+```{r}
 library(textrecipes)
 
-max_words <- 2000
-max_length <- 50
+max_words <- 48540
+max_length <- 25
 
 movie_rec <- recipe(~ text, data = train) %>%
   step_tokenize(text) %>%
@@ -314,11 +340,20 @@ movie_rec <- recipe(~ text, data = train) %>%
   step_sequence_onehot(text, sequence_length = max_length)
 ```
 
+The function `step_sequence_onehot` transforms the tokens into a numeric
+value that are more appropriate for modelling. It is similar to 
+`step_tf()` but the difference lies in that it takes into the account
+the order of the token. From the dim function we can see what dimensions
+is the right to choose for the max length and max words.
 
 ```{r}
 movie_prep <- prep(movie_rec)
 mov_train <- bake(movie_prep, new_data = NULL, composition = "matrix")
+dim(mov_train)
 ```
+
+Our first deep learning model embeds these moviereview text in sequences of vectors, flattens them, and then trains a dense network layer to predict whether the review was positive or not.
+
 
 ```{r}
 library(keras)
@@ -326,7 +361,7 @@ library(keras)
 dense_model <- keras_model_sequential() %>% 
   layer_embedding(
     input_dim = max_words + 1,
-    output_dim = 12,
+    output_dim = 25,
     input_length = max_length
   ) %>% 
   layer_flatten() %>% 
@@ -334,6 +369,30 @@ dense_model <- keras_model_sequential() %>%
   layer_dense(units = 1, activation = "sigmoid")
 dense_model
 ```
+
+Okay this is something new so let me take a long breath and go though the
+different step.
+
+- We use the function `keras_model_sequential()` to initalize the model.
+- The first layer `layer_embedding()` handles the preprocessed data.
+  Here we create a tensor from our train data. 
+- The next `layer_flatten()` takes our two dimensions and make it to one 
+  dimension.
+- Lastly, we have 2 densely connected layers. The last layer has a sigmoid     activation function to give us an output between 0 and 1, since we want to model a probability for a binary classification problem.
+
+We stil need a optimizer and a loss function for our model before we can
+fit to the train data. 
+
+When the neural network finishes passing a batch of data through the network, it needs a way to use the difference between the predicted values and true values to update the network’s weights. The algorithm that determines those weights is known as the optimization algorithm. Many optimizers are available within Keras itself11; you can even create custom optimizers if what you need isn’t on the list. We will start by using the [Adam optimizer](https://machinelearningmastery.com/adam-optimization-algorithm-for-deep-learning/), a good default optimizer for many problems.
+
+When traning a NN (neural network) we must have something we want
+to minimize which is our loss function. A loss function takes two values;
+the true value and the preiced value and return a ratio of how close they
+are. We are gonna use **binary cross entropy** because it does a good job
+in dealing with probabilities. It measures the distance between the distributions.
+
+For aplying this we use `complie()` that update the model with the
+optimizer, loss function and a measurement metric (here I choose accuracy). 
 
 ```{r}
 dense_model %>% compile(
@@ -343,27 +402,36 @@ dense_model %>% compile(
 )
 ```
 
+Now we can fit the model to the traning data. Here se set epochs = 30 meaning it loops though the traning data 30 times. 
+
 ```{r}
 dense_history <- dense_model %>%
   fit(
     x = mov_train,
     y = train$tag,
     batch_size = 512,
-    epochs = 20,
+    epochs = 30,
     validation_split = 0.25,
     verbose = FALSE
   )
 ```
 
+Then we can visualize the traning loop. 
 
 ```{r}
 plot(dense_history)
 ```
 
+Here it seems we only want to train our model on 6-7 epochs.
+
+For our first deep learning model, we used the Keras defaults for creating a validation split and tracking metrics, but we can use tidymodels functions to be more specific about these model characteristics. Instead of using the validation_split argument to `fit()`, we can create our own validation set using tidymodels and use validation_data argument for fit(). We create our validation split from the training set.
+
 ```{r}
 set.seed(234)
 mov_val <- validation_split(train, strata = tag)
 ```
+
+The moviereview-split object contains the information necessary to extract the data we will use for training/analysis and the data we will use for validation/assessment. We can extract these datasets in their raw, unprocessed form from the split using the helper functions analysis() and assessment(). Then, we can apply our prepped preprocessing recipe kick_prep to both to transform this data to the appropriate format for our neural network architecture.
 
 ```{r}
 mov_analysis <- bake(movie_prep,
@@ -386,11 +454,13 @@ state_analysis <- analysis(mov_val$splits[[1]]) %>% pull(tag)
 state_assess <- assessment(mov_val$splits[[1]]) %>% pull(tag)
 ```
 
+Let’s set up our same dense neural network architecture.
+
 ```{r}
 dense_model <- keras_model_sequential() %>%
   layer_embedding(
     input_dim = max_words + 1,
-    output_dim = 12,
+    output_dim = 25,
     input_length = max_length
   ) %>%
   layer_flatten() %>%
@@ -403,6 +473,10 @@ dense_model %>% compile(
   metrics = c("accuracy")
 )
 ```
+
+
+
+Now we can fit this model with dropout to kick_analysis and validate on kick_assess. Let’s only fit for 7 epochs this time.
 
 ```{r}
 val_history <- dense_model %>%
@@ -422,6 +496,7 @@ val_history
 plot(val_history)
 ```
 
+Using our own validation set also allows us to flexibly measure performance using tidymodels function from the yardstick package. We do need to set up a few transformations between Keras and tidymodels. The following function keras_predict() creates a little bridge between the two frameworks, combining a Keras model with baked (i.e. preprocessed) data and returns the predictions in a tibble format.
 
 ```{r}
 library(dplyr)
@@ -435,11 +510,17 @@ keras_predict <- function(model, baked_data, response) {
     state = response
   ) %>%
     mutate(across(
-      c(state, .pred_class), ## create factors
+      c(state, .pred_class), 
       ~ factor(.x, levels = c(1, 0))
-    )) ## with matching levels
+    )) 
 }
 ```
+
+This function only works with binary classification models that take a preprocessed matrix as input and return a single probability for each observation. It returns both the predicted probability as well as the predicted class, using a 50% probability threshold.
+
+This function creates prediction results that seamlessly connect with tidymodels and yardstick functions.
+
+
 
 ```{r}
 val_res <- keras_predict(dense_model, mov_assess, state_assess)
@@ -450,8 +531,40 @@ val_res
 metrics(val_res, state, .pred_class)
 ```
 
+The model certainly isn’t perfect; its accuracy is a little over 60%, but at least it is more or less evenly good at predicting both classes.
+
 ```{r}
 val_res %>%
-  conf_mat(state, .pred_class) %>%
-  autoplot(type = "heatmap")
+  roc_curve(truth = state, .pred_1) %>%
+  autoplot() +
+  labs(
+    title = "Receiver operator curve for Movie reviews"
+  )
 ```
+
+So we want to go with the dense model and try to predict the test set.
+
+```{r}
+df_test <- bake(movie_prep,
+  new_data = test,
+  composition = "matrix"
+)
+final_res <- keras_predict(dense_model, df_test, test$tag)
+final_res %>% metrics(state, .pred_class, .pred_1)
+```
+
+Here we get a accuracy on 60% which is not great at all and there is room 
+for adjusting the model so it perform better.
+
+## Conclusion
+
+In this first post introrduction to deep learning we have build a model 
+to predict movie reviews. It was compared to the performace for a Naive Bayes
+model and both model did´t do the best job in classifiying the reviews.
+
+The deep learning model was a simple first attemp to build a NNE framework.
+This post has to be seen in a continuation of the other post that will come
+where I wil explore furthere the different models and how they can be adjusted
+to get better results. 
+
+

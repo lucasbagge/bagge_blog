@@ -1,6 +1,6 @@
 ---
-title: Text mining
-author: R package build
+title: "Text mining"
+author: "R package build"
 date: '2021-01-28'
 slug: text-mining
 categories: []
@@ -85,28 +85,80 @@ So in a neural network we have the following objects:
 There are diffent types of layers and a simple layer is one that is stored in
 2D tensors of shape and they are processed by **densely connected layers**.
 
-So we first need to know which laer
+### Introduction to Keras
 
+For this post I will use `kera` which is a deep learning framework to train
+your model. It is a very used framework and is he second most used based 
+on the following plot.
 
+![Interest in deep learning framework over time](deepframework.png)
+
+Keras is high level meaning it dosen´t provide fx tensor manipulation operation.
+Here it realies on backend engine and you have the chosse between TensorFlow, 
+Theano and Microsoft Cognitive Toolkit. A pro for using TensorFlow is that 
+Keras is able to run on both CPUs and GPUs.
+
+Know that we now a little about neural network and the packages kera we can
+start modelling on movie reviews. 
+
+## Data
+
+The data is from kaggle which is a popular site for competing in building
+models for institution or firms that has a problem and want it solved with
+a model.
+
+For this paticular task we har given movie reviews and we want to predict from
+the text if it is positiv or negativ. 
+
+Let us get an overview of the data
 
 
 ```r
-moviereview <- read_csv("movie_review.csv") %>%
-  mutate(tag = as.factor(ifelse(tag == "pos", 1, 0)))
-moviereview %>% head()
+moviereview <- read_csv("movie_review.csv")
+
+moviereview %>% skimr::skim()
 ```
 
-```
-## # A tibble: 6 x 6
-##   fold_id cv_tag html_id sent_id text                                      tag  
-##     <dbl> <chr>    <dbl>   <dbl> <chr>                                     <fct>
-## 1       0 cv000    29590       0 "films adapted from comic books have had… 1    
-## 2       0 cv000    29590       1 "for starters , it was created by alan m… 1    
-## 3       0 cv000    29590       2 "to say moore and campbell thoroughly re… 1    
-## 4       0 cv000    29590       3 "the book ( or \" graphic novel , \" if … 1    
-## 5       0 cv000    29590       4 "in other words , don't dismiss this fil… 1    
-## 6       0 cv000    29590       5 "if you can get past the whole comic boo… 1
-```
+
+Table: Table 1: Data summary
+
+|                         |           |
+|:------------------------|:----------|
+|Name                     |Piped data |
+|Number of rows           |64720      |
+|Number of columns        |6          |
+|_______________________  |           |
+|Column type frequency:   |           |
+|character                |3          |
+|numeric                  |3          |
+|________________________ |           |
+|Group variables          |None       |
+
+
+**Variable type: character**
+
+|skim_variable | n_missing| complete_rate| min| max| empty| n_unique| whitespace|
+|:-------------|---------:|-------------:|---:|---:|-----:|--------:|----------:|
+|cv_tag        |         0|             1|   5|   5|     0|     1000|          0|
+|text          |         0|             1|   1| 887|     0|    63652|          0|
+|tag           |         0|             1|   3|   3|     0|        2|          0|
+
+
+**Variable type: numeric**
+
+|skim_variable | n_missing| complete_rate|     mean|      sd| p0|   p25|   p50|   p75|  p100|hist  |
+|:-------------|---------:|-------------:|--------:|-------:|--:|-----:|-----:|-----:|-----:|:-----|
+|fold_id       |         0|             1|     4.55|    2.85|  0|     2|     5|     7|     9|▇▇▇▇▇ |
+|html_id       |         0|             1| 16074.10| 7175.28| 42| 10613| 15091| 21865| 29867|▂▇▇▆▅ |
+|sent_id       |         0|             1|    18.98|   15.08|  0|     8|    16|    27|   111|▇▃▁▁▁ |
+
+From the data it is of course the `tag` (it gives us if the review was positive
+or negative) and th `text` (it gives a comment on the movie). So I need to
+use the two variable to see if I can use the information in the text to predict
+the tag. 
+
+To get a little familiar with the data I will look at the distribution of
+characters.
 
 
 ```r
@@ -114,37 +166,82 @@ moviereview %>%
   ggplot(aes(nchar(text))) +
   geom_histogram(binwidth = 1, alpha = 0.8) +
   labs(
-    x = "Number of characters per campaign blurb",
-    y = "Number of campaign blurbs"
+    x = "Number of characters per text",
+    y = "Number of text"
   )
 ```
 
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-2-1.png" width="2400" />
 
+The plot shows that the distribution is left-skewed and most reviewer docent
+write that much. 
+
+There is not much to say regarding the data because my focus is on building
+the models and introduced deep learning and how it can be applied in R.
+
+For making the models I will use a Naive Bayes model and a dense deep learning
+model to classify the reviews and see which models performce best. 
+
+
+## A Naive Bayes classification model.
+
+For the first moel we are gonna build a binary model to predict the tag. Let us
+look at the first reviews
+
 
 ```r
-moviereview_split <- moviereview %>% initial_split(strata = tag)
+moviereview %$% text %>% head()
+```
+
+```
+## [1] "films adapted from comic books have had plenty of success , whether they're about superheroes ( batman , superman , spawn ) , or geared toward kids ( casper ) or the arthouse crowd ( ghost world ) , but there's never really been a comic book like from hell before ."
+## [2] "for starters , it was created by alan moore ( and eddie campbell ) , who brought the medium to a whole new level in the mid '80s with a 12-part series called the watchmen ."                                                                                             
+## [3] "to say moore and campbell thoroughly researched the subject of jack the ripper would be like saying michael jackson is starting to look a little odd ."                                                                                                                   
+## [4] "the book ( or \" graphic novel , \" if you will ) is over 500 pages long and includes nearly 30 more that consist of nothing but footnotes ."                                                                                                                             
+## [5] "in other words , don't dismiss this film because of its source ."                                                                                                                                                                                                         
+## [6] "if you can get past the whole comic book thing , you might find another stumbling block in from hell's directors , albert and allen hughes ."
+```
+
+As many other text data it is messy and it should be corrected. In
+my preprocessinng step I will clean the data up.
+
+For every machine learning project I will create a traning and testing set.
+
+
+```r
+df <- moviereview %>% mutate(tag = as_factor(ifelse(tag == "pos", 1, 0)))
+moviereview_split <- df %>% initial_split(strata = tag)
 
 train <- training(moviereview_split)
 test <- testing(moviereview_split)
 ```
 
-## machine learing
+For building the Naive Bayes model I am going to rely on `tidymoels` which
+give a greate framework in building a model and apply it to the traning data.
 
+First let us create the recipe which is a preprocessing step where we
+tokenize the text column, remove stopwords, keep the max 150 frequent tokens,
+so we dont get to many variable in the model. 
 
 
 ```r
 complaints_rec <- recipe(tag ~ text, data = train) %>%
   step_tokenize(text) %>%
   textrecipes::step_stopwords(text) %>%
-  step_tokenfilter(text) %>%
+  step_tokenfilter(text, max_tokens = 500) %>%
   step_tfidf(text)
 ```
+
+Now that we have a full specification of the preprocessing recip, we can `prep()`
+this recipe to estimate all the parameter for each step using the traning data.
 
 
 ```r
 complaint_prep <- prep(complaints_rec)
 ```
+
+For most modelling takss you will not need to prep your recipe directly; instead
+you can build up a `workflow()` to bundle together your modeling components.
 
 
 ```r
@@ -152,6 +249,8 @@ complaint_wf <- workflow() %>%
   add_recipe(complaints_rec)
 ```
 
+The Naive Bayes moel is available in the package `discrim` and has a main advantages 
+in its capacity to handle large number of features.
 
 
 ```r
@@ -161,6 +260,9 @@ nb_spec <- naive_Bayes() %>%
   set_engine("naivebayes")
 ```
 
+Now we need to fit the model and for this we just have to add the Bayes model to
+our workflow an then fit it to the traning data. 
+
 
 ```r
 nb_fit <- complaint_wf %>%
@@ -168,11 +270,18 @@ nb_fit <- complaint_wf %>%
   fit(data = train)
 ```
 
+As a additional step before going to test the model on the testing set we
+will resample to evalutate our model. I am going to create 10 fold cross validation
+set for seing the models performance estimates.
+
 
 ```r
 set.seed(234)
 complaints_folds <- vfold_cv(train)
 ```
+
+Here we have 90% of the traning data in each fold and the other 10% is hel out 
+for evaluation. 
 
 
 ```r
@@ -180,6 +289,8 @@ nb_wf <- workflow() %>%
   add_recipe(complaints_rec) %>%
   add_model(nb_spec)
 ```
+
+Now we gonna fit it on the resampled fold.
 
 
 ```r
@@ -189,6 +300,9 @@ nb_rs <- fit_resamples(
   control = control_resamples(save_pred = TRUE)
 )
 ```
+
+We can extract the relevant information using `collect_metrices` and 
+`collect_predictions`.
 
 
 ```r
@@ -205,9 +319,15 @@ nb_rs_metrics
 ## # A tibble: 2 x 6
 ##   .metric  .estimator  mean     n std_err .config             
 ##   <chr>    <chr>      <dbl> <int>   <dbl> <chr>               
-## 1 accuracy binary     0.538    10 0.00277 Preprocessor1_Model1
-## 2 roc_auc  binary     0.565    10 0.00242 Preprocessor1_Model1
+## 1 accuracy binary     0.540    10 0.00467 Preprocessor1_Model1
+## 2 roc_auc  binary     0.573    10 0.00161 Preprocessor1_Model1
 ```
+
+For these resamples the average accuracy is 52 %.
+
+We can also plot **receiver operator curve** that shows sensitivity at different
+thresholds. It demonstrates how well a classification model can distinguish 
+between classes. 
 
 
 ```r
@@ -217,29 +337,35 @@ nb_rs_predictions %>%
   autoplot() +
   labs(
     color = NULL,
-    title = "Receiver operator curve for US Consumer Finance Complaints",
+    title = "Receiver operator curve for Reviewer",
     subtitle = "Each resample fold is shown in a different color"
   )
 ```
 
-<img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-14-1.png" width="2400" />
-
-
-```r
-nb_rs_predictions %>%
-  filter(id == "Fold01") %>%
-  conf_mat(tag, .pred_class) %>%
-  autoplot(type = "heatmap")
-```
-
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-15-1.png" width="2400" />
 
+The model is not great at all so let us see if a deep learning model does 
+a better job. 
 
-## deep learning
+## Deep learning
+
+One of the differnces using a deep learning model is the preprocessing.
+Here we need to choose the length of the text and if the text is
+longer then a certain length it will be truncated. The length is 
+a hyperparameter and one need to make sure they don´t 
+
+- overshoot so the text is given as zero.
+- undershoot so we cut of a lot of text. 
+
+We can count the word in the and select the right value.
+
 
 
 ```r
-moviereview_split <- moviereview %>%
+df <- moviereview %>%
+  filter(nchar(text) >= 10) %>%
+  mutate(tag = ifelse(tag == "pos", 1, 0))
+moviereview_split <- df %>%
   mutate(tag = as.numeric(tag)) %>%
   initial_split(strata = tag)
 
@@ -248,26 +374,27 @@ test <- testing(moviereview_split)
 ```
 
 
-
 ```r
 train %>%
   mutate(n_words = tokenizers::count_words(text)) %>%
   ggplot(aes(n_words)) +
   geom_bar() +
   labs(
-    x = "Number of words per campaign blurb",
-    y = "Number of campaign blurbs"
+    x = "Number of words per reviews",
+    y = "Number of reviews"
   )
 ```
 
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-17-1.png" width="2400" />
 
+I am goin to try 25 words and include 48540 words in the vocabulary.
+
 
 ```r
 library(textrecipes)
 
-max_words <- 2000
-max_length <- 50
+max_words <- 48540
+max_length <- 25
 
 movie_rec <- recipe(~text, data = train) %>%
   step_tokenize(text) %>%
@@ -275,12 +402,25 @@ movie_rec <- recipe(~text, data = train) %>%
   step_sequence_onehot(text, sequence_length = max_length)
 ```
 
+The function `step_sequence_onehot` transforms the tokens into a numeric
+value that are more appropriate for modelling. It is similar to 
+`step_tf()` but the difference lies in that it takes into the account
+the order of the token. From the dim function we can see what dimensions
+is the right to choose for the max length and max words.
 
 
 ```r
 movie_prep <- prep(movie_rec)
 mov_train <- bake(movie_prep, new_data = NULL, composition = "matrix")
+dim(mov_train)
 ```
+
+```
+## [1] 48031    25
+```
+
+Our first deep learning model embeds these moviereview text in sequences of vectors, flattens them, and then trains a dense network layer to predict whether the review was positive or not.
+
 
 
 ```r
@@ -289,7 +429,7 @@ library(keras)
 dense_model <- keras_model_sequential() %>%
   layer_embedding(
     input_dim = max_words + 1,
-    output_dim = 12,
+    output_dim = 25,
     input_length = max_length
   ) %>%
   layer_flatten() %>%
@@ -304,19 +444,43 @@ dense_model
 ## ________________________________________________________________________________
 ## Layer (type)                        Output Shape                    Param #     
 ## ================================================================================
-## embedding (Embedding)               (None, 50, 12)                  24012       
+## embedding (Embedding)               (None, 25, 25)                  1213525     
 ## ________________________________________________________________________________
-## flatten (Flatten)                   (None, 600)                     0           
+## flatten (Flatten)                   (None, 625)                     0           
 ## ________________________________________________________________________________
-## dense_1 (Dense)                     (None, 32)                      19232       
+## dense_1 (Dense)                     (None, 32)                      20032       
 ## ________________________________________________________________________________
 ## dense (Dense)                       (None, 1)                       33          
 ## ================================================================================
-## Total params: 43,277
-## Trainable params: 43,277
+## Total params: 1,233,590
+## Trainable params: 1,233,590
 ## Non-trainable params: 0
 ## ________________________________________________________________________________
 ```
+
+Okay this is something new so let me take a long breath and go though the
+different step.
+
+- We use the function `keras_model_sequential()` to initalize the model.
+- The first layer `layer_embedding()` handles the preprocessed data.
+  Here we create a tensor from our train data. 
+- The next `layer_flatten()` takes our two dimensions and make it to one 
+  dimension.
+- Lastly, we have 2 densely connected layers. The last layer has a sigmoid     activation function to give us an output between 0 and 1, since we want to model a probability for a binary classification problem.
+
+We stil need a optimizer and a loss function for our model before we can
+fit to the train data. 
+
+When the neural network finishes passing a batch of data through the network, it needs a way to use the difference between the predicted values and true values to update the network’s weights. The algorithm that determines those weights is known as the optimization algorithm. Many optimizers are available within Keras itself11; you can even create custom optimizers if what you need isn’t on the list. We will start by using the [Adam optimizer](https://machinelearningmastery.com/adam-optimization-algorithm-for-deep-learning/), a good default optimizer for many problems.
+
+When traning a NN (neural network) we must have something we want
+to minimize which is our loss function. A loss function takes two values;
+the true value and the preiced value and return a ratio of how close they
+are. We are gonna use **binary cross entropy** because it does a good job
+in dealing with probabilities. It measures the distance between the distributions.
+
+For aplying this we use `complie()` that update the model with the
+optimizer, loss function and a measurement metric (here I choose accuracy). 
 
 
 ```r
@@ -327,6 +491,8 @@ dense_model %>% compile(
 )
 ```
 
+Now we can fit the model to the traning data. Here se set epochs = 30 meaning it loops though the traning data 30 times. 
+
 
 ```r
 dense_history <- dense_model %>%
@@ -334,12 +500,13 @@ dense_history <- dense_model %>%
     x = mov_train,
     y = train$tag,
     batch_size = 512,
-    epochs = 20,
+    epochs = 30,
     validation_split = 0.25,
     verbose = FALSE
   )
 ```
 
+Then we can visualize the traning loop. 
 
 
 ```r
@@ -348,11 +515,17 @@ plot(dense_history)
 
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-23-1.png" width="2400" />
 
+Here it seems we only want to train our model on 6-7 epochs.
+
+For our first deep learning model, we used the Keras defaults for creating a validation split and tracking metrics, but we can use tidymodels functions to be more specific about these model characteristics. Instead of using the validation_split argument to `fit()`, we can create our own validation set using tidymodels and use validation_data argument for fit(). We create our validation split from the training set.
+
 
 ```r
 set.seed(234)
 mov_val <- validation_split(train, strata = tag)
 ```
+
+The moviereview-split object contains the information necessary to extract the data we will use for training/analysis and the data we will use for validation/assessment. We can extract these datasets in their raw, unprocessed form from the split using the helper functions analysis() and assessment(). Then, we can apply our prepped preprocessing recipe kick_prep to both to transform this data to the appropriate format for our neural network architecture.
 
 
 ```r
@@ -364,7 +537,7 @@ dim(mov_analysis)
 ```
 
 ```
-## [1] 36407    50
+## [1] 36024    25
 ```
 
 
@@ -377,7 +550,7 @@ dim(mov_assess)
 ```
 
 ```
-## [1] 12134    50
+## [1] 12007    25
 ```
 
 
@@ -386,12 +559,14 @@ state_analysis <- analysis(mov_val$splits[[1]]) %>% pull(tag)
 state_assess <- assessment(mov_val$splits[[1]]) %>% pull(tag)
 ```
 
+Let’s set up our same dense neural network architecture.
+
 
 ```r
 dense_model <- keras_model_sequential() %>%
   layer_embedding(
     input_dim = max_words + 1,
-    output_dim = 12,
+    output_dim = 25,
     input_length = max_length
   ) %>%
   layer_flatten() %>%
@@ -404,6 +579,10 @@ dense_model %>% compile(
   metrics = c("accuracy")
 )
 ```
+
+
+
+Now we can fit this model with dropout to kick_analysis and validate on kick_assess. Let’s only fit for 7 epochs this time.
 
 
 ```r
@@ -423,10 +602,10 @@ val_history
 ```
 ## 
 ## Final epoch (plot to see history):
-##         loss: -10,591
-##     accuracy: 0.4911
-##     val_loss: -12,336
-## val_accuracy: 0.4911
+##         loss: 0.02451
+##     accuracy: 0.9933
+##     val_loss: 1.293
+## val_accuracy: 0.6304
 ```
 
 
@@ -436,6 +615,7 @@ plot(val_history)
 
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-30-1.png" width="2400" />
 
+Using our own validation set also allows us to flexibly measure performance using tidymodels function from the yardstick package. We do need to set up a few transformations between Keras and tidymodels. The following function keras_predict() creates a little bridge between the two frameworks, combining a Keras model with baked (i.e. preprocessed) data and returns the predictions in a tibble format.
 
 
 ```r
@@ -450,11 +630,17 @@ keras_predict <- function(model, baked_data, response) {
     state = response
   ) %>%
     mutate(across(
-      c(state, .pred_class), ## create factors
+      c(state, .pred_class),
       ~ factor(.x, levels = c(1, 0))
-    )) ## with matching levels
+    ))
 }
 ```
+
+This function only works with binary classification models that take a preprocessed matrix as input and return a single probability for each observation. It returns both the predicted probability as well as the predicted class, using a 50% probability threshold.
+
+This function creates prediction results that seamlessly connect with tidymodels and yardstick functions.
+
+
 
 
 ```r
@@ -463,20 +649,20 @@ val_res
 ```
 
 ```
-## # A tibble: 12,134 x 3
+## # A tibble: 12,007 x 3
 ##    .pred_1 .pred_class state
 ##      <dbl> <fct>       <fct>
-##  1       1 1           <NA> 
-##  2       1 1           <NA> 
-##  3       1 1           <NA> 
-##  4       1 1           <NA> 
-##  5       1 1           <NA> 
-##  6       1 1           <NA> 
-##  7       1 1           <NA> 
-##  8       1 1           <NA> 
-##  9       1 1           <NA> 
-## 10       1 1           <NA> 
-## # … with 12,124 more rows
+##  1  0.866  1           1    
+##  2  0.0773 0           1    
+##  3  0.618  1           1    
+##  4  1.00   1           1    
+##  5  0.974  1           1    
+##  6  0.988  1           1    
+##  7  0.923  1           1    
+##  8  0.333  0           1    
+##  9  0.663  1           1    
+## 10  0.0879 0           1    
+## # … with 11,997 more rows
 ```
 
 
@@ -488,15 +674,58 @@ metrics(val_res, state, .pred_class)
 ## # A tibble: 2 x 3
 ##   .metric  .estimator .estimate
 ##   <chr>    <chr>          <dbl>
-## 1 accuracy binary             1
-## 2 kap      binary           NaN
+## 1 accuracy binary         0.630
+## 2 kap      binary         0.260
 ```
+
+The model certainly isn’t perfect; its accuracy is a little over 60%, but at least it is more or less evenly good at predicting both classes.
 
 
 ```r
 val_res %>%
-  conf_mat(state, .pred_class) %>%
-  autoplot(type = "heatmap")
+  roc_curve(truth = state, .pred_1) %>%
+  autoplot() +
+  labs(
+    title = "Receiver operator curve for Movie reviews"
+  )
 ```
 
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-34-1.png" width="2400" />
+
+So we want to go with the dense model and try to predict the test set.
+
+
+```r
+df_test <- bake(movie_prep,
+  new_data = test,
+  composition = "matrix"
+)
+final_res <- keras_predict(dense_model, df_test, test$tag)
+final_res %>% metrics(state, .pred_class, .pred_1)
+```
+
+```
+## # A tibble: 4 x 3
+##   .metric     .estimator .estimate
+##   <chr>       <chr>          <dbl>
+## 1 accuracy    binary         0.626
+## 2 kap         binary         0.253
+## 3 mn_log_loss binary         1.27 
+## 4 roc_auc     binary         0.678
+```
+
+Here we get a accuracy on 60% which is not great at all and there is room 
+for adjusting the model so it perform better.
+
+## Conclusion
+
+In this first post introrduction to deep learning we have build a model 
+to predict movie reviews. It was compared to the performace for a Naive Bayes
+model and both model did´t do the best job in classifiying the reviews.
+
+The deep learning model was a simple first attemp to build a NNE framework.
+This post has to be seen in a continuation of the other post that will come
+where I wil explore furthere the different models and how they can be adjusted
+to get better results. 
+
+
