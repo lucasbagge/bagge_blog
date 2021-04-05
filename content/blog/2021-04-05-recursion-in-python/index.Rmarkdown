@@ -1,0 +1,120 @@
+---
+title: Recursion in Python
+author: Lucas Bagge
+date: '2021-04-05'
+slug: recursion-in-python
+categories:
+  - python
+  - tutorial
+tags:
+  - python
+  - tutorial
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-04-05T18:59:03+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
+                      tidy = "styler", fig.width = 8, fig.height = 5)
+library(reticulate)
+```
+
+When one is doing some programming task or analysis data there is use for some repeating tasks. Here most are used to `for` and `while` loops. 
+
+However, there's another form of repeating a task, in a slightly different manner. By calling a function within itself, to solve a smaller instance of the same problem, we're performing `recursion`.
+
+These functions call themselves until the problem is solved, practically dividing the initial problem to a lot of smaller instances of itself – like for an example, taking small bites of a larger piece of food.
+
+## What is Recursion?
+
+So recursion is a process where the functions calls itself and it often has two components:
+
+- The `base case` which is a condition that determines when the recursive function should stop
+
+- The call to itself
+
+As a general thing one can define a function as below where everything between the def and the return statment should include the recursion call.
+
+
+```{python}
+# def func(): <--
+#               |
+#               | (recursive call)
+#               |
+#     func() ----
+```
+
+## Examples
+
+I will show two examples of how to use recursion in python.
+
+The first one is with the function `hi_recursive` that takes a numeric value and print hi. Here the base case is when you type in 0. 
+
+```{python}
+# Assume that remaining is a positive integer
+def hi_recursive(remaining):
+    # The base case
+    if remaining == 0:
+        return
+    print('hi')
+
+    # Call to function, with a reduced remaining count
+    hi_recursive(remaining - 1)
+    
+print(hi_recursive(3))
+```
+
+The second example is based on sorting a pile of cards.
+
+1) Here we split the pile into two piles, **left** and **right**.
+2) Then we take a recursively step and sort the left and right pile.
+3) The last step is then to merge the those togeather.
+
+The first function `merge` is a function that merge the two piles (list) togeather.
+
+The real resursive function comes in the second function `merge_sort` where we have a base case if the length of the list is smaller then or equal to 1. The next step is the  resursive argument where we are calling the function again. 
+
+
+```{python}
+def merge(A, B):
+  n = len(A) + len(B) # Get the length of the two lists.
+  C = n * [None] # for the length of the list type in None
+  a, b = 0, 0
+  for c in range(n):
+    # Here we take the empty list C and fill up with our values in the lists.
+    if a < len(A) and (b == len(B) or A[a] < B[b]):
+      C[c] = A[a]
+      a = a + 1
+    else:
+      C[c] = B[b]
+      b = b + 1
+  return C
+
+def merge_sort(L):
+  n = len(L)
+  if n <= 1:
+    return L[:]
+  mid = n // 2
+  left, right = L[:mid], L[mid:]
+  return merge(merge_sort(left), merge_sort(right))
+
+```
+
+```{python}
+print(merge_sort([6,5,9,2,4,8,1,7]))
+```
+
+## Conclusion
+
+In this short tutorial I have shown a very popular framwork in programmings called resursive. It is a popular method when doing repetitive taks. It is also a building blok to `dynamic programming`. That topic is for another tutorial.  
