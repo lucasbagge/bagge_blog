@@ -121,7 +121,7 @@ subtitle = ""
 * [Introduction to Bayesian Statistics](https://www.udemy.com/course/introduction-to-bayesian-statistics/learn/lecture/20460081#overview)
 * [R Programming for Simulation and Monte Carlo Methods](https://www.udemy.com/course/r-programming-for-simulation-and-monte-carlo-methods/learn/lecture/3563566#overview)
 * Multiple `R`, `Python` and `Machine Learning` courses on [Datacamp](https://learn.datacamp.com/courses)
-
+* Deep learning Specialization at [coursera](https://www.coursera.org/specializations/deep-learning?utm_source=gg&utm_medium=sem&utm_campaign=17-DeepLearning-ROW&utm_content=17-DeepLearning-ROW&campaignid=6465471773&adgroupid=77415260637&device=c&keyword=coursera%20deep%20learning%20ai&matchtype=e&network=g&devicemodel=&adpostion=&creativeid=506751438660&hide_mobile_promo&gclid=Cj0KCQjw1PSDBhDbARIsAPeTqrfLvOJuMYzHoujJEjuv4yEZAlY4DhglZBDH9GCTnTW1GXzgwgITQ9kaAkrnEALw_wcB).
 
 ### TA 
 2018-2019
