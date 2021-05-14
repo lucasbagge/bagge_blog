@@ -10,6 +10,16 @@
   weight = 10
 
 [[main]]
+  name = "Tidymodels"
+  url = "tidymodels"
+  weight = 10
+
+[[main]]
+  name = "Python"
+  url = "Python"
+  weight = 10
+
+[[main]]
   name = "About"
   url = "about"
   weight = 20
