@@ -25,6 +25,11 @@
   weight = 10
   
 [[main]]
+  name = "Azure"
+  url = "azure"
+  weight = 10
+  
+[[main]]
   name = "About"
   url = "about"
   weight = 20
