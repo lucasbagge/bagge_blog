@@ -1,0 +1,154 @@
+---
+title: Going the exta mile
+author: R package build
+date: '2021-07-29'
+slug: going-the-exta-mile
+categories: []
+tags: []
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-07-29T13:32:06+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(reticulate)
+library(tidyverse)
+library(tidyquant)
+library(lubridate)
+library(shiny)
+library(highcharter)
+library(quantmod)
+virtualenv_create("kats-proj")
+py_install("kats", envname = "kats-proj")
+py_install("pandas", envname = "kats-proj")
+py_install("pandas_datareader", envname = "kats-proj")
+use_virtualenv("kats-proj")
+```
+
+
+## Introduction
+
+For my interview at Frey I would like to show that I am a person that
+want to *go the extra mile*. Therefore I have made a short report where 
+I have taken three agricultural commodities:
+
+- [Corn](https://finance.yahoo.com/quote/CORN/)
+- [Soy](https://finance.yahoo.com/quote/soyb/)
+- [Wheat](https://finance.yahoo.com/quote/WEAT/)
+
+From those I have made a interactive report with `shiny` showing;
+a historical plot, a summary and a table of the data. 
+
+For trying to forecast the prices I have build a Vector Autoregressive model
+and assume the prices a correlated to each other and predicted the next 90
+days prices. 
+
+The building of the report has been rushed so I have included a reflection
+section with things that could be improved.
+
+## Data
+
+I am using the [Yahoo Fiance](https://finance.yahoo.com/) to extract the data for
+the commidities. Here I use the package `tidyquant` to create a connection to
+the url.
+
+```{r}
+corn  <- tq_get(
+  "CORN", 
+  get = "stock.prices",
+  from = "2018-01-01")
+
+wheat  <- tq_get(
+  "WEAT", 
+  get = "stock.prices",
+  from = "2018-01-01")
+
+soy <- tq_get(
+  "SOYB",
+  get = "stock.prices",
+  from = "2018-01-01")
+```
+
+## The shiny component
+
+Shiny is a way of making a dashboard or a interactive report It consist of
+a UI and a Server element. 
+
+
+```{r, echo=FALSE}
+fluidPage(
+  
+  titlePanel("Tabsets"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("stocks",
+                  "Select stock:",
+                  choices = c(
+                    "CORN",
+                    "WEAT",
+                    "SOYB"
+                    ), 
+                  selected = "CORN"
+      ),
+      br(),
+      selectInput(
+        "plots",
+        label = "Types:",
+        choices = c("candlestick", "line")
+      )
+    ),
+    mainPanel(
+      tabsetPanel(type = "tabs", 
+                  tabPanel("Plot", highchartOutput("plot")), 
+                  tabPanel("Summary", verbatimTextOutput("summary")), 
+                  tabPanel("Table", tableOutput("table"))
+      )
+    )
+  )
+)
+
+
+df  <- 
+  reactive({
+    tq_get(
+      input$stocks,
+      get = "stock.prices",
+      from = "2018-01-01")
+  })
+
+output$plot <- renderHighchart({
+  
+  if (input$plots == "candlestick") {
+    
+    test <- df() |> timetk::tk_xts(date_var = "date")
+    
+    hchart(test)
+    
+  } else if (input$plots == "line") {
+    
+    df() |>
+      hchart("line", hcaes(x = date, y = close))
+    
+  }
+})
+
+output$summary <- renderPrint({
+  
+  summary(df())
+})
+
+output$table <- renderTable({
+  
+  data.frame(x=df())
+  
+})
+```
