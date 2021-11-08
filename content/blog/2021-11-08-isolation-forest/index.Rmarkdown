@@ -141,8 +141,6 @@ df %>%
              size=3)
 ```
 
-
-
 ## Conclusion
 
 We have tried to modelling outliers the NYC data set. The model
