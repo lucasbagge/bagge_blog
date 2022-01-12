@@ -187,9 +187,10 @@ auc(y_test, mse_test)
 
 ```{r}
 possible_k <- seq(0, 0.5, length.out = 100)
+
 precision <- sapply(possible_k, function(k) {
   predicted_class <- as.numeric(mse_test > k)
-  sum(predicted_class == 1 & y_test == 1)/sum(predicted_class)
+  sum(predicted_class == 1 & y_test == 1) / sum(predicted_class)
 })
 
 qplot(possible_k, precision, geom = "line") + 

@@ -136,15 +136,16 @@ data %>%
 
 ## Modelling
 
-Using `isotree`
+Using `isotree`.
 
 
 ```r
 mod <-
   isolation.forest(
     data,
-    ntrees = 500,
-    nthreads = 1
+    ntrees = 100,
+    nthreads = 1,
+    max_depth = 10
   )
 
 p <- predict(mod, data)
@@ -170,8 +171,6 @@ df %>%
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="2400" />
-
-
 
 ## Conclusion
 
