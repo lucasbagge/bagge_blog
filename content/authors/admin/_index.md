@@ -4,9 +4,9 @@ authors:
 bio: I'm an author, international minded, and real-world practitioner focusing on data analysis and machine learning practice. I love making beautiful charts and communicating about technical topics with diverse audiences.
 email: ""
 organizations:
-- name: Blackwoodseven
-  url: "https://blackwoodseven.com/"
-role: Data Scientist & Data Manager 
+- name: Norlys
+  url: "https://norlys.dk/"
+role: Data Analyst
 social:
 - icon: twitter
   icon_pack: fab
