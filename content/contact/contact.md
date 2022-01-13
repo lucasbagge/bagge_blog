@@ -29,6 +29,3 @@ email_form = 0
 ## Mail
 
 * lucasbagge@hotmail.com
-* lucba@orsted.dk
-* lb@blackwoodseven.com
-* au661872@uni.au.dk
